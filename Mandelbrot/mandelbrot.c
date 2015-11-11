@@ -121,12 +121,16 @@ compute_chunk(struct mandelbrot_param *args)
 
 /***** You may modify this portion *****/
 #if NB_THREADS > 0
+
+
 void
 init_round(struct mandelbrot_thread *args)
 {
 	// Initialize or reinitialize here variables before any thread starts or restarts computation
 	// Every thread run this function; feel free to allow only one of them to do anything
-}
+
+	int id = args->id;
+}	
 
 /*
  * Each thread starts individually this function, where args->id give the thread's id from 0 to NB_THREADS
@@ -136,6 +140,9 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 {
 // Compiled only if LOADBALANCE = 0
 #if LOADBALANCE == 0
+
+	parameters->height = parameters->height/NB_THREADS;
+	//parameters->width = parameters->width/NB_THREADS;
 	// Replace this code with a naive *parallel* implementation.
 	// Only thread of ID 0 compute the whole picture
 	if(args->id == 0)
@@ -147,6 +154,20 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 		// Entire width: from 0 to picture's width
 		parameters->begin_w = 0;
 		parameters->end_w = parameters->width;
+
+		// Go
+		compute_chunk(parameters);
+	}
+	else 
+	{
+		// Define the region compute_chunk() has to compute
+		// Entire height: from 0 to picture's height
+		parameters->picture->data += (parameters->picture->height/NB_THREADS)*parameters->picture->width;
+		parameters->begin_h = parameters->height*args->id-1;
+		parameters->end_h = parameters->height*(args->id+1);
+		// Entire width: from 0 to picture's width
+		parameters->begin_w = parameters->width*args->id;
+		parameters->end_w = parameters->width*(args->id+1);
 
 		// Go
 		compute_chunk(parameters);
