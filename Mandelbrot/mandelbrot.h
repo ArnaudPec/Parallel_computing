@@ -26,6 +26,8 @@
 #ifndef MANDELBROT_H_
 #define MANDELBROT_H_
 
+pthread_mutex_t mutex; 
+
 struct mandelbrot_param
 {
   int height, width, maxiter;
@@ -33,7 +35,8 @@ struct mandelbrot_param
   int begin_h, end_h, begin_w, end_w;
   float lower_r, upper_r, lower_i, upper_i;
   struct ppm * picture;
-  int number;
+  int horizontal_number;
+	int vertical_number;
 };
 
 #ifdef MEASURE

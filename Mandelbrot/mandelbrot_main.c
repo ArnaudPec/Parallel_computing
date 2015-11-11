@@ -41,16 +41,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <pthread.h>
 
 #include "mandelbrot.h"
 #include "gl_mandelbrot.h"
 
+
+  
 
 
 int
 main(int argc, char ** argv)
 {
   struct mandelbrot_param param;
+
+  pthread_mutex_init(&mutex, NULL);
 
   param.height = HEIGHT;
   param.width = WIDTH;
@@ -62,8 +67,6 @@ main(int argc, char ** argv)
   param.mandelbrot_color.red = (MANDELBROT_COLOR >> 16) & 255;
   param.mandelbrot_color.green = (MANDELBROT_COLOR >> 8) & 255;
   param.mandelbrot_color.blue = MANDELBROT_COLOR & 255;
-  param.number = 0;
-  
 
   // Initializes the mandelbrot computation framework. Among other, spawns the threads in thread pool
   init_mandelbrot(&param);

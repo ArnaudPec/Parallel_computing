@@ -22,6 +22,8 @@
 #endif
 
 color_t *color = NULL;
+int y_num = 0;
+int x_num = 0;
 
 #if NB_THREADS > 0
 // Compiled only when several threads are used
@@ -35,6 +37,7 @@ struct mandelbrot_timing timing;
 
 int thread_stop;
 pthread_barrier_t thread_pool_barrier;
+
 
 pthread_t thread[NB_THREADS];
 struct mandelbrot_thread thread_data[NB_THREADS];
@@ -125,9 +128,7 @@ compute_chunk(struct mandelbrot_param *args)
 void
 init_round(struct mandelbrot_thread *args)
 {
-	// Initialize or reinitialize here variables before any thread starts or restarts computation
-	// Every thread run this function; feel free to allow only one of them to do anything
-	
+
 	
 }	
 
@@ -140,8 +141,6 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 // Compiled only if LOADBALANCE = 0
 #if LOADBALANCE == 0
 
-	//parameters->height = parameters->height/NB_THREADS;
-	//parameters->width = parameters->width/NB_THREADS;
 	// Replace this code with a naive *parallel* implementation.
 	// Only thread of ID 0 compute the whole picture
 	if(args->id == 0)
@@ -161,7 +160,6 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 	{
 		// Define the region compute_chunk() has to compute
 		// Entire height: from 0 to picture's height
-		//parameters->picture->data += (parameters->picture->height/NB_THREADS);//*parameters->picture->width;
 		parameters->begin_h = (parameters->height*args->id-1)/NB_THREADS;
 		parameters->end_h = (parameters->height*(args->id+1))/NB_THREADS;
 		// Entire width: from 0 to picture's width
@@ -174,36 +172,60 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 #endif
 // Compiled only if LOADBALANCE = 1
 #if LOADBALANCE == 1
-	// Replace this code with your load-balanced smarter solution.
-	// Only thread of ID 0 compute the whole picture
-	/*
-	if(args->id == 0)
-	{
-		// Define the region compute_chunk() has to compute
-		// Entire height: from 0 to picture's height
-		parameters->begin_h = 0;
-		parameters->end_h = parameters->height;
-		// Entire width: from 0 to picture's width
-		parameters->begin_w = 0;
-		parameters->end_w = parameters->width;
+	
+	int x_work = 50;
+	int y_work = 5;
 
-		// Go
+	while(x_num <= parameters->width && y_num < parameters->height)
+	{
+
+		pthread_mutex_lock(&mutex);
+
+		if(x_num < parameters->width)
+		{
+			parameters->begin_w = x_num;
+			parameters->end_w = x_num+x_work;
+			x_num += x_work;
+		}
+		else
+		{
+			x_num = 0;
+			y_num += y_work;
+		}
+
+		//pthread_unlock_mutex(&mutex);
+
+		parameters->begin_h = y_num;
+		parameters->end_h = y_num+y_work;
+
+		pthread_mutex_unlock(&mutex);
+
 		compute_chunk(parameters);
 	}
+	/*
+	while(parameters->vertical_number < parameters->height){
+
+		pthread_mutex_lock (&mutex);
+
+		if(parameters->horizontal_number == parameters->width){
+			parameters->horizontal_number=0;
+			parameters->vertical_number++;
+		}
+		
+		parameters->begin_h = parameters->vertical_number;
+		parameters->end_h = parameters->vertical_number+1;
+		parameters->begin_w = parameters->horizontal_number;
+		parameters->end_w = parameters->horizontal_number+100;
+		
+		parameters->horizontal_number += 100;
+
+		pthread_mutex_unlock(&mutex);
+		
+		compute_chunk(parameters);
+
+	} 
 	*/
-	
-	//get a pixel to work with
-	//parameters->picture->data += sizeof(parameters->picture->data);
-	
-	parameters->begin_h = parameters->number;
-	parameters->end_h = parameters->number+1;
-	// Entire width: from 0 to picture's width
-	parameters->begin_w = 0;
-	parameters->end_w = parameters->width;
 
-	parameters->number++;
-
-	compute_chunk(parameters);
 #endif
 // Compiled only if LOADBALANCE = 2
 #if LOADBALANCE == 2
@@ -336,9 +358,9 @@ update_colors(struct mandelbrot_param* param)
 	// Initialize the color vector
 	for (i = 0; i < num_colors(param); i++)
 	{
-		color[i].green = (stop.green - start.green) * ((double) i / num_colors(param)) + start.green;
-		color[i].red = (stop.red - start.red) * ((double) i / num_colors(param)) + start.red;
-		color[i].blue = (stop.blue - start.blue) * ((double) i / num_colors(param)) + start.blue;
+		color[i].green = (stop.green - start.green) * ((double) i);// / num_colors(param)) + start.green;
+		color[i].red = (stop.red - start.red) * ((double) i);// / num_colors(param)) + start.red;
+		color[i].blue = (stop.blue - start.blue) * ((double) i);// / num_colors(param)) + start.blue;
 	}
 }
 
@@ -389,7 +411,7 @@ init_mandelbrot(struct mandelbrot_param *param)
 
 		// Check the good behavior or pthread_create; must be disabled while measuring for performance reasons
 #ifdef DEBUG
-		assert(pthread_create(&thread[i], &thread_attr, &run_thread, &thread_data[i]) == 0);
+		assert(pthread_create(&thread[i], &thread_attr, &, &thread_data[i]) == 0);
 #else
 		pthread_create(&thread[i], &thread_attr, &run_thread, &thread_data[i]);
 #endif

@@ -5,12 +5,14 @@ ARCHIVE=Lab1.zip
 MAXITER=256
 WIDTH=500
 HEIGHT=375
+#WIDTH=1000
+#HEIGHT=750
 LOWER_R=-2
 UPPER_R=0.6
 LOWER_I=-1
 UPPER_I=1
-NB_THREADS=0
-LOADBALANCE=0
+NB_THREADS=6
+LOADBALANCE=1
 MANDELBROT_COLOR=0
 GLUT=0
 
@@ -28,6 +30,9 @@ clean:
 	$(RM) mandelbrot-*
 	$(RM) mandelbrot
 	$(RM) *.o
+	$(RM) -rf *CET_2015
+	$(RM) *.svg
+	
 
 mandelbrot-$(MAXITER)-$(WIDTH)-$(HEIGHT)-$(LOWER_R)-$(UPPER_R)-$(LOWER_I)-$(UPPER_I)-$(NB_THREADS)-$(LOADBALANCE): mandelbrot_main.c mandelbrot-$(MAXITER)-$(WIDTH)-$(HEIGHT)-$(LOWER_R)-$(UPPER_R)-$(LOWER_I)-$(UPPER_I)-$(NB_THREADS)-$(LOADBALANCE).o ppm.o gl_mandelbrot.o
 	gcc $(CFLAGS) -o mandelbrot-$(MAXITER)-$(WIDTH)-$(HEIGHT)-$(LOWER_R)-$(UPPER_R)-$(LOWER_I)-$(UPPER_I)-$(NB_THREADS)-$(LOADBALANCE) mandelbrot-$(MAXITER)-$(WIDTH)-$(HEIGHT)-$(LOWER_R)-$(UPPER_R)-$(LOWER_I)-$(UPPER_I)-$(NB_THREADS)-$(LOADBALANCE).o ppm.o gl_mandelbrot.o mandelbrot_main.c $(LDFLAGS)
