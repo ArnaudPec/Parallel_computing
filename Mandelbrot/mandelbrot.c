@@ -129,8 +129,8 @@ void
 init_round(struct mandelbrot_thread *args)
 {
 
-	
-}	
+
+}
 
 /*
  * Each thread starts individually this function, where args->id give the thread's id from 0 to NB_THREADS
@@ -156,7 +156,7 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 		// Go
 		compute_chunk(parameters);
 	}
-	else 
+	else
 	{
 		// Define the region compute_chunk() has to compute
 		// Entire height: from 0 to picture's height
@@ -172,7 +172,7 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 #endif
 // Compiled only if LOADBALANCE = 1
 #if LOADBALANCE == 1
-	
+
 	int x_work = 50;
 	int y_work = 5;
 
@@ -211,19 +211,19 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 			parameters->horizontal_number=0;
 			parameters->vertical_number++;
 		}
-		
+
 		parameters->begin_h = parameters->vertical_number;
 		parameters->end_h = parameters->vertical_number+1;
 		parameters->begin_w = parameters->horizontal_number;
 		parameters->end_w = parameters->horizontal_number+100;
-		
+
 		parameters->horizontal_number += 100;
 
 		pthread_mutex_unlock(&mutex);
-		
+
 		compute_chunk(parameters);
 
-	} 
+	}
 	*/
 
 #endif
@@ -305,7 +305,7 @@ run_thread(void * buffer)
 
 		// Wait for the next work signal
 		pthread_barrier_wait(&thread_pool_barrier);
-	
+
 		// Fetch the latest parameters
 		param = mandelbrot_param;
 	}

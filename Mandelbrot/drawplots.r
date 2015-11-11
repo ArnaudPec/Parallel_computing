@@ -97,9 +97,9 @@ gradient = function(colors = c("#0000FF", "#11FFFF", "#22FF22", "#FFFF33", "#FF4
 ## Compute the execution time for each run of the experiment
 data.frame = ddply(
   data.frame, c("nb_thread", "thread", "loadbalance", "try"), summarize,
-  thread_time = 
+  thread_time =
     thread_stop_time_sec + nsec2sec(thread_stop_time_nsec) - thread_start_time_sec - nsec2sec(thread_start_time_nsec),
-  global_time = 
+  global_time =
     global_stop_time_sec + nsec2sec(global_stop_time_nsec) - global_start_time_sec - nsec2sec(global_start_time_nsec)
 )
 
@@ -126,7 +126,7 @@ plot = ggplot() +
   guides(fill = guide_legend(title = "Thread"), colour = guide_legend(title = "Load-balancing"), shape = guide_legend(title = "Load-balancing")) +
   ylab("Running time in seconds") +
   xlab(label("nb_thread")) +
-  ggtitle("Running time for parallel reduction") + 
+  ggtitle("Running time for parallel reduction") +
   scale_fill_manual(values = gradient(number = 9)) +
   scale_colour_manual(values = gradient(colors = c("#DD0000", "#008800"), grayscale = c("#DD0000", "#008800"), number = 3))
 ## Save the plot as a svg file
@@ -153,7 +153,7 @@ detailed_plot = function(data.frame, filename)
 		  guides(fill = guide_legend(title = "Thread"), colour = guide_legend(title = "Load-balancing"), shape = guide_legend(title = "Load-balancing")) +
 		  ylab("Running time in seconds") +
 		  xlab(label("nb_thread")) +
-		  ggtitle("Running time for mandelbrot subset") + 
+		  ggtitle("Running time for mandelbrot subset") +
 		  scale_fill_manual(values = gradient(number = 9)) +
 		  scale_colour_manual(values = gradient(colors = c("#DD0000", "#008800"), grayscale = c("#DD0000", "#008800"), number = 3))
 		## Save the plot as a svg file
@@ -164,4 +164,3 @@ detailed_plot = function(data.frame, filename)
 detailed_plot(data.frame[data.frame$loadbalance == 0,], "2_timing-no_balance.svg")
 detailed_plot(data.frame[data.frame$loadbalance == 1 | (data.frame$nb_thread == 0 & data.frame$loadbalance == 0),], "3_timing-load_balance_1.svg")
 detailed_plot(data.frame[data.frame$loadbalance == 2 | (data.frame$nb_thread == 0 & data.frame$loadbalance == 0),], "4_timing-load_balance_2.svg")
-
