@@ -33,6 +33,7 @@ struct mandelbrot_param
   int begin_h, end_h, begin_w, end_w;
   float lower_r, upper_r, lower_i, upper_i;
   struct ppm * picture;
+  int number;
 };
 
 #ifdef MEASURE

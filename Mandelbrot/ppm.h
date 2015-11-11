@@ -18,6 +18,7 @@ struct ppm
 	int height;
 	int width;
 	color_t * data;
+	//color_t* next_pixel;
 };
 
 void ppm_save(struct ppm *, char *);

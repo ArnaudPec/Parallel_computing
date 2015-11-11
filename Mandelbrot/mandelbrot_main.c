@@ -45,6 +45,8 @@
 #include "mandelbrot.h"
 #include "gl_mandelbrot.h"
 
+
+
 int
 main(int argc, char ** argv)
 {
@@ -60,6 +62,8 @@ main(int argc, char ** argv)
   param.mandelbrot_color.red = (MANDELBROT_COLOR >> 16) & 255;
   param.mandelbrot_color.green = (MANDELBROT_COLOR >> 8) & 255;
   param.mandelbrot_color.blue = MANDELBROT_COLOR & 255;
+  param.number = 0;
+  
 
   // Initializes the mandelbrot computation framework. Among other, spawns the threads in thread pool
   init_mandelbrot(&param);
