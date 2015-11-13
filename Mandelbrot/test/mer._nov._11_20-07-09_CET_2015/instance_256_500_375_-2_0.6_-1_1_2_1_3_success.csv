@@ -1,3 +1,0 @@
-"thread","thread_start_time_sec","thread_start_time_nsec","thread_stop_time_sec","thread_stop_time_nsec","global_start_time_sec","global_start_time_nsec","global_stop_time_sec","global_stop_time_nsec"
-1,10096,825158825,10096,903269638,10096,825130234,10096,903335596
-2,10096,825161473,10096,903286640,10096,825130234,10096,903335596

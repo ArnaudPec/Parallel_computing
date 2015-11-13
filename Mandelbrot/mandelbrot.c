@@ -173,8 +173,8 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 // Compiled only if LOADBALANCE = 1
 #if LOADBALANCE == 1
 
-	int x_work = 50;
-	int y_work = 5;
+	int x_work = 1;
+	int y_work = 1;
 
 	while(x_num <= parameters->width && y_num < parameters->height)
 	{
