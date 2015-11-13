@@ -261,6 +261,7 @@ int
 main(int argc, char **argv)
 {
 setbuf(stdout, NULL);
+pthread_mutex_init(&mutex);
 // MEASURE == 0 -> run unit tests
 #if MEASURE == 0
   test_init();

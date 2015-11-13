@@ -36,7 +36,9 @@
 #include "non_blocking.h"
 
 #if NON_BLOCKING == 0
-#warning Stacks are synchronized through locks
+
+
+
 #else
 #if NON_BLOCKING == 1
 #warning Stacks are synchronized through hardware CAS
@@ -59,15 +61,19 @@ stack_check(stack_t *stack)
 #endif
 }
 
-int /* Return the type you prefer */
-stack_push(/* Make your own signature */)
+stack * stack_push(stack* head, void * data)
 {
+    stack * newHead = malloc(sizeof(stack));
+    newHead->data = data;
 #if NON_BLOCKING == 0
-  // Implement a lock_based stack
+    pthread_lock_mutex(&mutex);
+    new_head->ptr=head;
+    pthread_lock_mutex(&mutex);
+
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
 #else
-  /*** Optional ***/
+  /*** Optional *j*/
   // Implement a software CAS-based stack
 #endif
 
@@ -76,7 +82,7 @@ stack_push(/* Make your own signature */)
   // This is to be updated as your implementation progresses
   stack_check((stack_t*)1);
 
-  return 0;
+  return newHead;
 }
 
 int /* Return the type you prefer */
@@ -84,6 +90,9 @@ stack_pop(/* Make your own signature */)
 {
 #if NON_BLOCKING == 0
   // Implement a lock_based stack
+
+
+    stack * newHead = head->ptr;
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
 #else
@@ -91,6 +100,6 @@ stack_pop(/* Make your own signature */)
   // Implement a software CAS-based stack
 #endif
 
-  return 0;
+  return newHead;
 }
 

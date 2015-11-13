@@ -29,18 +29,19 @@
 
 struct stack
 {
-  // This is a fake structure; change it to your needs
-  int change_this_member;
+    stack * ptr;
+    void * data; 
 };
 typedef struct stack stack_t;
 
+pthread_mutex_t mutex;
+
 // Pushes an element in a thread-safe manner
-int /* Return the type you prefer */
-stack_push(/* Make your own signature */);
+stack * /* Return the type you prefer */
+stack_push(stack * head, void * data);
 
 // Pops an element in a thread-safe manner
-int /* Return the type you prefer */
-stack_pop(/* Make your own signature */);
+stack* stack_pop(stack *head);
 
 
 
