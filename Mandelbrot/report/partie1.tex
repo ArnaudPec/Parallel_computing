@@ -1,2 +1,30 @@
-\section*{}
+\section*{Preparatory questions}
 \thispagestyle{empty}
+
+1. Generating a Mandelbrot set is not an equilibrated task. Indeed some
+pixels need more computation than others. Pixels are generated via the method 
+\textit{is\_in\_Mandelbrot} 
+which consists in a loop bounded by a given number of iteration
+\textit{maxiter} and a distance \textit{dist2}. If the distance is superior
+than 4, the computation stops and the pixel is not part of the Mandelbrot
+set. However if this pixel is actually part of the set the computation stops
+when \textit{maxiter} is reached, which implies more computation. 
+This results in an unbalanced workload. 
+
+2. The naive load-balancing method consists in dividing the picture same size 
+blocks, each assigned to a thread. For example, running the program with two
+threads results in dividing the the workload in two equal parts. Obviously
+this method is unbalanced.
+A better solution would be to divide the work in way smaller parts, a 
+square or a rectangle of (x,y) pixels resulting in a lot more \textit{workunit}
+than the number of threads.
+This way, each thread would compute a tiny piece of work, and after completion
+look for another one among the remaining workload. A system of mutex has to
+be implemented to protect the work assignation.
+Statistically this method provides a more balanced computation because each of
+them will process \textit{hard} and \textit{easy} parts.
+
+\newpage
+\thispagestyle{empty}
+
+\section*{Performance results and comparison}
