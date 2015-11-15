@@ -173,7 +173,7 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 // Compiled only if LOADBALANCE = 1
 #if LOADBALANCE == 1
 
-	int x_work = 1;
+	int x_work = 1; // Chunk size specification
 	int y_work = 1;
 
 	while(x_num <= parameters->width && y_num < parameters->height)
@@ -192,8 +192,6 @@ parallel_mandelbrot(struct mandelbrot_thread *args, struct mandelbrot_param *par
 			x_num = 0;
 			y_num += y_work;
 		}
-
-		//pthread_unlock_mutex(&mutex);
 
 		parameters->begin_h = y_num;
 		parameters->end_h = y_num+y_work;
