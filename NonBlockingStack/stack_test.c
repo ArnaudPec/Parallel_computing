@@ -50,6 +50,7 @@ typedef int data_t;
 
 stack_t *stack;
 data_t data;
+//pthread_mutex_init(&mutex, NULL);
 
 #if MEASURE != 0
 struct stack_measure_arg
@@ -113,7 +114,9 @@ test_setup()
 
   // Reset explicitely all members to a well-known initial value
   // For instance (to be deleted as your stack design progresses):
-  stack->change_this_member = 0;
+  //stack->change_this_member = 0;
+  stack->ptr = NULL;
+  stack->data = NULL;
 }
 
 void
@@ -137,14 +140,18 @@ test_push_safe()
   // several threads push concurrently to it
 
   // Do some work
-  stack_push(/* add relevant arguments here */);
+  stack_t* t = (stack_t*)malloc(sizeof(stack_t));
+  t->ptr = NULL;
+  t->data = (void *)42;
+  stack = stack_push(stack, t);
 
   // check if the stack is in a consistent state
   stack_check(stack);
 
   // check other properties expected after a push operation
   // (this is to be updated as your stack design progresses)
-  assert(stack->change_this_member == 0);
+  //assert(stack->change_this_member == 0);
+  assert(stack == t->ptr);// && (int)stack->data == 42);
 
   // For now, this test always fails
   return 0;
@@ -154,7 +161,8 @@ int
 test_pop_safe()
 {
   // Same as the test above for parallel pop operation
-
+  stack = stack_pop(stack);
+	
   // For now, this test always fails
   return 0;
 }
@@ -261,7 +269,7 @@ int
 main(int argc, char **argv)
 {
 setbuf(stdout, NULL);
-pthread_mutex_init(&mutex);
+pthread_mutex_init(&mutex, NULL);
 // MEASURE == 0 -> run unit tests
 #if MEASURE == 0
   test_init();

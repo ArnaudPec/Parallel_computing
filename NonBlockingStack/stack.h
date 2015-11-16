@@ -27,21 +27,21 @@
 #ifndef STACK_H
 #define STACK_H
 
+typedef struct stack stack_t;
 struct stack
 {
-    stack * ptr;
+    stack_t * ptr;
     void * data; 
 };
-typedef struct stack stack_t;
 
 pthread_mutex_t mutex;
 
 // Pushes an element in a thread-safe manner
-stack * /* Return the type you prefer */
-stack_push(stack * head, void * data);
+stack_t * /* Return the type you prefer */
+stack_push(stack_t * head, stack_t* newHead);
 
 // Pops an element in a thread-safe manner
-stack* stack_pop(stack *head);
+stack_t* stack_pop(stack_t *head);
 
 
 
