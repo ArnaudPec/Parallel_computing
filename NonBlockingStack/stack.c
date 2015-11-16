@@ -85,16 +85,15 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
   return newHead;
 }
 
-stack_t* /* Return the type you prefer */
-stack_pop(stack_t* head)
+//returns poped element
+stack_t* stack_pop(stack_t* head)
 {
 #if NON_BLOCKING == 0
   // Implement a lock_based stack
     pthread_mutex_lock(&mutex);
-    stack_t* newHead = head->ptr;
+	stack_t* ret = head;
+    head = head->ptr;
     pthread_mutex_unlock(&mutex);
-	//made not?
-	free(head);
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
 #else
@@ -102,6 +101,17 @@ stack_pop(stack_t* head)
   // Implement a software CAS-based stack
 #endif
 
-  return newHead;
+  return ret;
 }
 
+int sizeof_stack(stack_t* head)
+{
+	int i = 0;
+	stack_t* temp = head;
+	while(temp != NULL)
+	{
+		temp = temp->ptr;
+		i++;
+	}
+	return i;
+}

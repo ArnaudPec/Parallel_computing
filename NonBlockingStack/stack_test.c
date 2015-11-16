@@ -143,7 +143,9 @@ test_push_safe()
   stack_t* t = (stack_t*)malloc(sizeof(stack_t));
   t->ptr = NULL;
   t->data = (void *)42;
+  int size = sizeof_stack(stack);
   stack = stack_push(stack, t);
+  int size2 = sizeof_stack(stack);
 
   // check if the stack is in a consistent state
   stack_check(stack);
@@ -151,20 +153,20 @@ test_push_safe()
   // check other properties expected after a push operation
   // (this is to be updated as your stack design progresses)
   //assert(stack->change_this_member == 0);
-  assert(stack == t->ptr);// && (int)stack->data == 42);
+  assert(stack == t->ptr && size == size2-1 );// && (int)stack->data == 42);
 
   // For now, this test always fails
-  return 0;
+  return 1;
 }
 
 int
 test_pop_safe()
 {
   // Same as the test above for parallel pop operation
-  stack = stack_pop(stack);
-	
+  stack_t* popped = stack_pop(stack);
+	assert(popped != stack);	
   // For now, this test always fails
-  return 0;
+  return 1;
 }
 
 // 3 Threads should be enough to raise and detect the ABA problem
