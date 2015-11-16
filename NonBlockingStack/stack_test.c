@@ -67,11 +67,13 @@ stack_measure_pop(void* arg)
   {
     stack_measure_arg_t *args = (stack_measure_arg_t*) arg;
     int i;
+	stack_t* popped;
 
     clock_gettime(CLOCK_MONOTONIC, &t_start[args->id]);
     for (i = 0; i < MAX_PUSH_POP / NB_THREADS; i++)
       {
         // See how fast your implementation can pop MAX_PUSH_POP elements in parallel
+		popped = stack_pop(stack);
       }
     clock_gettime(CLOCK_MONOTONIC, &t_stop[args->id]);
 
@@ -84,10 +86,14 @@ stack_measure_push(void* arg)
   stack_measure_arg_t *args = (stack_measure_arg_t*) arg;
   int i;
 
+  stack_t* new = (stack_t*)malloc(sizeof(stack_t));
+  new->data = (void *)42;
+
   clock_gettime(CLOCK_MONOTONIC, &t_start[args->id]);
   for (i = 0; i < MAX_PUSH_POP / NB_THREADS; i++)
     {
         // See how fast your implementation can push MAX_PUSH_POP elements in parallel
+		stack_push(stack, new);
     }
   clock_gettime(CLOCK_MONOTONIC, &t_stop[args->id]);
 
