@@ -163,9 +163,12 @@ int
 test_pop_safe()
 {
   // Same as the test above for parallel pop operation
+  int size = sizeof_stack(stack);
   stack_t* popped = stack_pop(stack);
-	assert(popped != stack);	
+  int size2 = sizeof_stack(stack);
+	assert(size+1 == size2 && popped != stack);	
   // For now, this test always fails
+  //free(popped);
   return 1;
 }
 
