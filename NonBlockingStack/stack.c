@@ -61,14 +61,14 @@ stack_check(stack_t *stack)
 #endif
 }
 
-stack * stack_push(stack* head, void * data)
+stack_t* stack_push(stack_t* head, stack_t* newHead)
 {
-    stack * newHead = malloc(sizeof(stack));
-    newHead->data = data;
+    //stack_t* newHead = (stack_t*)malloc(sizeof(stack_t));
+    //newHead->data = data;
 #if NON_BLOCKING == 0
-    pthread_lock_mutex(&mutex);
-    new_head->ptr=head;
-    pthread_lock_mutex(&mutex);
+    pthread_mutex_lock(&mutex);
+    newHead->ptr=head;
+    pthread_mutex_unlock(&mutex);
 
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
@@ -85,14 +85,16 @@ stack * stack_push(stack* head, void * data)
   return newHead;
 }
 
-int /* Return the type you prefer */
-stack_pop(/* Make your own signature */)
+stack_t* /* Return the type you prefer */
+stack_pop(stack_t* head)
 {
 #if NON_BLOCKING == 0
   // Implement a lock_based stack
-
-
-    stack * newHead = head->ptr;
+    pthread_mutex_lock(&mutex);
+    stack_t* newHead = head->ptr;
+    pthread_mutex_unlock(&mutex);
+	//made not?
+	free(head);
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
 #else
