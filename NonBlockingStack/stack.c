@@ -70,15 +70,14 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
 
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
-    stack_t * old;
-    do{
-     old = head;
-     newHead->ptr = old;
-    } 
-    while(cas(head,old,newHead)!=old);
 
-    newHead->ptr=head;
-    
+    //newHead->ptr=head;
+    stack_t* old;
+	do
+	{
+		old = head;
+		newHead->ptr = old;
+	}while(cas(head, old, (size_t)newHead->ptr) != old);
 #else
   /*** Optional *j*/
 
@@ -96,7 +95,8 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
 //returns poped element
 stack_t* stack_pop(stack_t* head)
 {
-    
+    if(head == NULL)
+		return NULL;
 	stack_t* ret; 
 #if NON_BLOCKING == 0
   // Implement a lock_based stack
@@ -106,14 +106,13 @@ stack_t* stack_pop(stack_t* head)
     pthread_mutex_unlock(&mutex);
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
-   stack_t *newHead; 
+	stack_t *newHead; 
     do{
-        stack_t * newHead= head;
+        newHead= head;
         head->ptr = newHead;
         ret = newHead;
     } 
     while(cas(head,newHead,head->ptr)!=newHead);
-
 #else
   /*** Optional ***/
   // Implement a software CAS-based stack
