@@ -85,6 +85,9 @@ stack_t* stack_push_aba(stack_t* head, stack_t* newHead)
             pthread_mutex_lock(&mutex);
         }while(cas(newHead->ptr, old, head) == old);
     }
+    stack* S = newHead;
+    stack* A = stack_pop_aba(S);
+    stack_push_aba(S, A)
     pthread_mutex_unlock(&mutex);
 #else
 
