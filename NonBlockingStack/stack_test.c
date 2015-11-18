@@ -50,7 +50,6 @@ typedef int data_t;
 
 stack_t *stack;
 data_t data;
-//pthread_mutex_init(&mutex, NULL);
 
 #if MEASURE != 0
 struct stack_measure_arg
@@ -187,6 +186,45 @@ test_aba()
 #if NON_BLOCKING == 1 || NON_BLOCKING == 2
   int success, aba_detected = 0;
   // Write here a test for the ABA problem
+
+  pthread_attr_t attr;
+  pthread_t thread[ABA_NB_THREADS];
+  thread_test_cas_args_t args[ABA_NB_THREADS];
+  pthread_mutexattr_t mutex_attr;
+  pthread_mutex_t lock;
+
+  size_t counter;
+
+  int i, success;
+
+  counter = 0;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE); 
+  pthread_mutexattr_init(&mutex_attr);
+  pthread_mutex_init(&lock, &mutex_attr);
+
+  for (i = 0; i < ABA_NB_THREADS; i++)
+    {
+      args[i].id = i;
+      args[i].counter = &counter;
+      args[i].lock = &lock;
+      pthread_create(&thread[i], &attr, &thread_test_aba, (void*) &args[i]);
+    }
+
+  for (i = 0; i < ABA_NB_THREADS; i++)
+    {
+      pthread_join(thread[i], NULL);
+    }
+
+  success = counter == (size_t)(NB_THREADS * MAX_PUSH_POP);
+
+  if (!success)
+    {
+      printf("Got %ti, expected %i. ", counter, NB_THREADS * MAX_PUSH_POP);
+    }
+
+  assert(success);
+  return success;
   success = aba_detected;
   return success;
 #else
@@ -288,7 +326,7 @@ pthread_mutex_init(&mutex, NULL);
   test_run(test_cas);
   test_run(test_push_safe);
   test_run(test_pop_safe);
-  //test_run(test_aba);
+  test_run(test_aba);
   test_finalize();
 #else
   int i;

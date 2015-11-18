@@ -61,6 +61,43 @@ stack_check(stack_t *stack)
 #endif
 }
 
+stack_t* stack_push_aba(stack_t* head, stack_t* newHead)
+{
+#if NON_BLOCKING == 0
+    pthread_mutex_lock(&mutex);
+    newHead->ptr=head;
+    pthread_mutex_unlock(&mutex);
+
+#elif NON_BLOCKING == 1
+  // Implement a harware CAS-based stack
+
+    if(head == NULL)
+    {
+        newHead->ptr = head;
+    }
+    else
+    {
+        stack_t* old;
+        do
+        {
+            old = head;
+            newHead->ptr = old;
+            pthread_mutex_lock(&mutex);
+        }while(cas(newHead->ptr, old, head) == old);
+    }
+    pthread_mutex_unlock(&mutex);
+#else
+
+  // Implement a software CAS-based stack
+#endif
+
+  // Debug practice: you can check if this operation results in a stack in a consistent check
+  // It doesn't harm performance as sanity check are disabled at measurement time
+  // This is to be updated as your implementation progresses
+  stack_check((stack_t*)1);
+
+  return newHead;
+}
 stack_t* stack_push(stack_t* head, stack_t* newHead)
 {
 #if NON_BLOCKING == 0
@@ -71,12 +108,19 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
 #elif NON_BLOCKING == 1
   // Implement a harware CAS-based stack
 
-    stack_t* old;
-	do
-	{
-		old = head;
-		newHead->ptr = old;
-	}while(cas(head, old, newHead) != old);
+    if(head == NULL)
+    {
+        newHead->ptr = head;
+    }
+    else
+    {
+        stack_t* old;
+        do
+        {
+            old = head;
+            newHead->ptr = old;
+        }while(cas(newHead->ptr, old, head) == old);
+    }
 #else
 
   // Implement a software CAS-based stack
@@ -90,6 +134,43 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
   return newHead;
 }
 
+stack_t* stack_pop_aba(stack_t* head)
+{
+    if(head == NULL)
+		return NULL;
+	stack_t* ret; 
+#if NON_BLOCKING == 0
+  // Implement a lock_based stack
+    pthread_mutex_lock(&mutex);
+	ret = head;
+    head = head->ptr;
+    pthread_mutex_unlock(&mutex);
+#elif NON_BLOCKING == 1
+  // Implement a harware CAS-based stack
+	stack_t *newHead; 
+    if (head->ptr == NULL){
+        ret=head;
+        head = NULL;
+    }
+    else
+    {
+        do{
+            ret = head;
+            newHead = head->ptr;
+            head = newHead;
+            pthread_mutex_lock(&mutex);
+        } 
+        while(cas(head,newHead,newHead)!=newHead);
+        pthread_mutex_unlock(&mutex)
+
+    }
+#else
+  /*** Optional ***/
+  // Implement a software CAS-based stack
+#endif
+
+  return ret;
+}
 //returns poped element
 stack_t* stack_pop(stack_t* head)
 {
