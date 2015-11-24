@@ -161,15 +161,32 @@ void PrintHelp()
 void Draw()
 {
     
+    cudaEvent_t myEvent, laterEvent;
+    cudaEventCreate(&myEvent);
+    cudaEventCreate(&laterEvent);
+    cudaEventRecord(myEvent, 0);
+	
     cudaMalloc((void **)&d_pixels, size); 
 
+    cudaMemcpy(d_pixels,pixels,size,cudaMemcpyHostToDevice);
+    
+	dim3 dimBlock( 32, 32 );
+	dim3 dimGrid( 1, 1 );
+
 	computeFractal<<< dimGrid,dimBlock>>> (pixels);
+
     cudaThreadSynchronize();
+
+    cudaMemcpy(pixels,d_pixels,size,cudaMemcpyDeviceToHost);
 
     cudaEventRecord(laterEvent, 0);
     cudaEventSynchronize(laterEvent); 
     cudaEventElapsedTime(&theTime, myEvent, laterEvent);
-	
+
+    cudaFree(d_pixels);
+    cudaEventDestroy(&myEvent);
+    cudaEventDestroy(&laterEvent);
+
 // Dump the whole picture onto the screen. (Old-style OpenGL but without lots of geometry that doesn't matter so much.)
 	glClearColor( 0.0, 0.0, 0.0, 1.0 );
 	glClear( GL_COLOR_BUFFER_BIT );
@@ -254,11 +271,6 @@ void KeyboardProc(unsigned char key, int x, int y)
 // Main program, inits
 int main( int argc, char** argv) 
 {
-    cudaEvent_t myEvent, laterEvent;
-    cudaEventCreate(&myEvent);
-    cudaEventCreate(&laterEvent);
-    cudaEventRecord(myEvent, 0);
-	
 	glutInit(&argc, argv);
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA );
 	glutInitWindowSize( DIM, DIM );
