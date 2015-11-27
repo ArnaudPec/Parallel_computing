@@ -51,6 +51,8 @@ typedef int data_t;
 stack_t *stack;
 data_t data;
 
+void*
+thread_test_aba(void* arg);
 #if MEASURE != 0
 struct stack_measure_arg
 {
@@ -180,11 +182,20 @@ test_pop_safe()
 // 3 Threads should be enough to raise and detect the ABA problem
 #define ABA_NB_THREADS 3
 
+// We test here the CAS function
+struct thread_test_cas_args
+{
+  int id;
+  size_t* counter;
+  pthread_mutex_t *lock;
+};
+typedef struct thread_test_cas_args thread_test_cas_args_t;
+
 int
 test_aba()
 {
 #if NON_BLOCKING == 1 || NON_BLOCKING == 2
-  int success, aba_detected = 0;
+  int success, i, aba_detected = 0;
   // Write here a test for the ABA problem
 
   pthread_attr_t attr;
@@ -194,8 +205,6 @@ test_aba()
   pthread_mutex_t lock;
 
   size_t counter;
-
-  int i, success;
 
   counter = 0;
   pthread_attr_init(&attr);
@@ -233,14 +242,6 @@ test_aba()
 #endif
 }
 
-// We test here the CAS function
-struct thread_test_cas_args
-{
-  int id;
-  size_t* counter;
-  pthread_mutex_t *lock;
-};
-typedef struct thread_test_cas_args thread_test_cas_args_t;
 
 void*
 thread_test_cas(void* arg)
@@ -263,6 +264,22 @@ thread_test_cas(void* arg)
     }
 #endif
 
+  return NULL;
+}
+
+void*
+thread_test_aba(void* arg)
+{
+  thread_test_cas_args_t *args = (thread_test_cas_args_t*) arg;
+  int i;
+  size_t old, local;
+  stack_t* tmp;
+  tmp = stack_pop_aba(stack, args->lock);
+  stack_pop_aba(stack, args->lock);
+  stack_push_aba(stack, tmp);
+  pthread_mutex_unlock(args->lock);
+ 
+  printf("%s", "aba raised");
   return NULL;
 }
 

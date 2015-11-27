@@ -82,13 +82,13 @@ stack_t* stack_push_aba(stack_t* head, stack_t* newHead)
         {
             old = head;
             newHead->ptr = old;
-            pthread_mutex_lock(&mutex);
         }while(cas(newHead->ptr, old, head) == old);
     }
-    stack* S = newHead;
-    stack* A = stack_pop_aba(S);
-    stack_push_aba(S, A)
-    pthread_mutex_unlock(&mutex);
+    /*stack* S = newHead;*/
+    
+    /*stack* A = stack_pop_aba(S);*/
+    /*stack_push_aba(S, A)*/
+    /*pthread_mutex_unlock(&mutex);*/
 #else
 
   // Implement a software CAS-based stack
@@ -137,7 +137,7 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
   return newHead;
 }
 
-stack_t* stack_pop_aba(stack_t* head)
+stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex)
 {
     if(head == NULL)
 		return NULL;
@@ -164,7 +164,6 @@ stack_t* stack_pop_aba(stack_t* head)
             pthread_mutex_lock(&mutex);
         } 
         while(cas(head,newHead,newHead)!=newHead);
-        pthread_mutex_unlock(&mutex)
 
     }
 #else

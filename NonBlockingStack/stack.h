@@ -43,6 +43,9 @@ stack_push(stack_t * head, stack_t* newHead);
 // Pops an element in a thread-safe manner
 stack_t* stack_pop(stack_t *head);
 
+stack_t* stack_push_aba(stack_t* head, stack_t* newHead);
+stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex);
+
 int sizeof_stack(stack_t* head);
 
 /* Debug practice: check the boolean expression expr; if it computes to 0, print a warning message on standard error and exit */
