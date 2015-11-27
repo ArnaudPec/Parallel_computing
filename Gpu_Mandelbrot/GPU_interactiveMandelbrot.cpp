@@ -19,7 +19,6 @@
 // Image data
 unsigned char	*pixels = NULL;
 int	 gImageWidth, gImageHeight, size;
-size = width * height * sizeof(char);
 float *d_pixels, theTime;
 // Init image data
 void initBitmap(int width, int height)
@@ -28,6 +27,7 @@ void initBitmap(int width, int height)
 	pixels = (unsigned char *)malloc(size);
 	gImageWidth = width;
 	gImageHeight = height;
+    size = width * height * sizeof(char);
 }
 
 #define DIM 512
@@ -45,20 +45,20 @@ struct cuComplex
 {
     MYFLOAT   r;
     MYFLOAT   i;
-    
+
     cuComplex( MYFLOAT a, MYFLOAT b ) : r(a), i(b)  {}
-    
-    float magnitude2( void )
+
+    __device__ float magnitude2( void )
     {
         return r * r + i * i;
     }
-    
-    cuComplex operator*(const cuComplex& a)
+
+    __device__ cuComplex operator*(const cuComplex& a)
     {
         return cuComplex(r*a.r - i*a.i, i*a.r + r*a.i);
     }
-    
-    cuComplex operator+(const cuComplex& a)
+
+    __device__    cuComplex operator+(const cuComplex& a)
     {
         return cuComplex(r+a.r, i+a.i);
     }
@@ -88,7 +88,7 @@ __global__ void computeFractal(unsigned char *ptr){
 
     // map from x, y to pixel position
     int x = blockIdx.x;
-    int y = blockIdy.y;
+    int y = blockIdx.y;
 
     int offset = x + y * gridDim.x;
 
@@ -184,8 +184,8 @@ void Draw()
     cudaEventElapsedTime(&theTime, myEvent, laterEvent);
 
     cudaFree(d_pixels);
-    cudaEventDestroy(&myEvent);
-    cudaEventDestroy(&laterEvent);
+    cudaEventDestroy(myEvent);
+    cudaEventDestroy(laterEvent);
 
 // Dump the whole picture onto the screen. (Old-style OpenGL but without lots of geometry that doesn't matter so much.)
 	glClearColor( 0.0, 0.0, 0.0, 1.0 );

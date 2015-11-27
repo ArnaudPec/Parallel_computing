@@ -21,7 +21,7 @@ int main()
 	const int size = N*sizeof(float);
 	
 	for (int i = 0; i < N; i++)
-        c[i]=16;
+        c[i]=i;
 
 	cudaMalloc( (void**)&cd, size );
 
@@ -30,7 +30,7 @@ int main()
 
     cudaMemcpy(cd,c,size,cudaMemcpyHostToDevice);
 
-	simple<<<dimGrid, dimBlock>>>(cd);
+	parallel_sqrt<<<dimGrid, dimBlock>>>(cd);
 
     cudaThreadSynchronize();
 
