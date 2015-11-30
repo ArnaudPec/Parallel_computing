@@ -74,10 +74,13 @@ stack_t* stack_push_aba(stack_t* head, stack_t* newHead)
     if(head == NULL)
     {
         newHead->ptr = head;
+		printf("adds first element");
     }
     else
     {
         stack_t* old;
+
+		printf("%i size of stack.", sizeof_stack(head));
         do
         {
             old = head;
@@ -161,9 +164,10 @@ stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex)
             ret = head;
             newHead = head->ptr;
             head = newHead;
-            pthread_mutex_lock(&mutex);
+            //pthread_mutex_lock(&mutex);
         } 
         while(cas(head,newHead,newHead)!=newHead);
+		//pthread_mutex_unlock(&mutex);
 
     }
 #else
