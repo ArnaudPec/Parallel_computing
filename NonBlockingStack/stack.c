@@ -47,6 +47,8 @@
 #endif
 #endif
 
+static int lock = 1;
+
 void
 stack_check(stack_t *stack)
 {
@@ -85,7 +87,7 @@ stack_t* stack_push_aba(stack_t* head, stack_t* newHead)
         {
             old = head;
             newHead->ptr = old;
-        }while(cas(newHead->ptr, old, head) == old);
+        }while(cas(newHead->ptr, old, head) != old);
     }
     /*stack* S = newHead;*/
     
@@ -140,7 +142,7 @@ stack_t* stack_push(stack_t* head, stack_t* newHead)
   return newHead;
 }
 
-stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex)
+stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex, int tid)
 {
     if(head == NULL)
 		return NULL;
@@ -161,13 +163,20 @@ stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex)
     else
     {
         do{
+            printf("thread %i begins pop\n", tid);
             ret = head;
             newHead = head->ptr;
             head = newHead;
+            if(tid == 0)
+            {
+                while (lock == 1)
+                {}
+            }
             //pthread_mutex_lock(&mutex);
         } 
-        while(cas(head,newHead,newHead)!=newHead);
-		//pthread_mutex_unlock(&mutex);
+        while(cas(head,newHead,newHead) ==newHead);
+        printf("thread %i ends pop\n", tid);
+            //pthread_mutex_unlock(&mutex);
 
     }
 #else
@@ -223,4 +232,9 @@ int sizeof_stack(stack_t* head)
 		i++;
 	}
 	return i;
+}
+
+void unlock()
+{
+    lock = 0;
 }

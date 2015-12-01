@@ -1,15 +1,4 @@
-/*
- * stack_test.c
- *
- *  Created on: 18 Oct 2011
- *  Copyright 2011 Nicolas Melot
- *
- * This file is part of TDDD56.
- * 
- *     TDDD56 is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
+/* * stack_test.c * *  Created on: 18 Oct 2011 *  Copyright 2011 Nicolas Melot * * This file is part of TDDD56.  * *     TDDD56 is free software: you can redistribute it and/or modify *     it under the terms of the GNU General Public License as published by *     the Free Software Foundation, either version 3 of the License, or *     (at your option) any later version.
  * 
  *     TDDD56 is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -217,14 +206,13 @@ test_aba()
   // Reset explicitely all members to a well-known initial value
   // For instance (to be deleted as your stack design progresses):
   //stack->change_this_member = 0;
-  for(i = 42; i < 45; ++i)
+  for(i = 0; i < 45; ++i)
   {
 	  stack_t* new_element = (stack_t*)malloc(sizeof(stack_t));
 	  new_element->ptr = NULL;
 	  new_element->data = (void*)i;
 	  stack = stack_push(stack, new_element);
   }
-  printf("size of stack at start: %i.\n", sizeof_stack(stack));
 
   //done with ini
 
@@ -291,15 +279,18 @@ thread_test_aba(void* arg)
   //int i;
   //size_t old, local;
   stack_t* tmp;
-  tmp = stack_pop_aba(stack, args->lock);
+  tmp = stack_pop_aba(stack, args->lock, args->id);
   printf("thread %i popped\n", args->id);
-  stack_pop_aba(stack, args->lock);
-  printf("thread %i popped\n", args->id);
-  stack_push_aba(stack, tmp);
-  printf("thread %i pushed\n", args->id);
-
+  if(args->id == 1)
+  {
+      stack_pop_aba(stack, args->lock, args->id);
+      printf("thread %i popped\n", args->id);
+      stack_push_aba(stack, tmp);
+      printf("thread %i pushed\n", args->id);
+      unlock();
+  }
  
-  printf("%s", "aba raised");
+  printf("%s", "aba raised\n");
   return NULL;
 }
 

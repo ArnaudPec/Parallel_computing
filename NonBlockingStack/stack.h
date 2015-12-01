@@ -44,7 +44,8 @@ stack_push(stack_t * head, stack_t* newHead);
 stack_t* stack_pop(stack_t *head);
 
 stack_t* stack_push_aba(stack_t* head, stack_t* newHead);
-stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex);
+stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex, int tid);
+void unlock();
 
 int sizeof_stack(stack_t* head);
 
