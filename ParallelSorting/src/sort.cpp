@@ -313,6 +313,7 @@ static void* qs(void* input)
             if(data->array[i] < data->pivots[j])
             {
                 data->sorted_arrays[j].push_back(data->array[i]);
+                data->array.erase(data->array.begin()+i);
                 nothing_pushed = false;
             }
             else if(j == NB_THREADS-2)
