@@ -162,15 +162,20 @@ stack_t* stack_pop_aba(stack_t* head, pthread_mutex_t* mutex, int tid)
     }
     else
     {
+        
+        printf("thread %i begins pop\n", tid);
         do{
-            printf("thread %i begins pop\n", tid);
             ret = head;
             newHead = head->ptr;
             head = newHead;
+            //printf("%i\n", tid);
             if(tid == 0)
             {
+                //printf("%s\n", "if");
                 while (lock == 1)
-                {}
+                {
+                //printf("%s\n", "inner loop");
+                }
             }
             //pthread_mutex_lock(&mutex);
         } 
@@ -212,7 +217,7 @@ stack_t* stack_pop(stack_t* head)
             newHead = head->ptr;
             head = newHead;
         } 
-        while(cas(head,newHead,newHead)!=newHead);
+        while(cas(head,newHead,newHead)==newHead);
     }
 #else
   /*** Optional ***/
