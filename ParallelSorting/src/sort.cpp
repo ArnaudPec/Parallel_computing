@@ -183,9 +183,6 @@ void init_threads(int* c_array, int size)
         array.push_back(c_array[i]);
     }
 
-	int i,j;
-
-     //struct chunck chuncks[NB_THREADS];// = (chunck*)malloc(sizeof(chunck));
     vector<chunck> chuncks(NB_THREADS);
     //chuncks->array = (int*)malloc(sizeof(size/NB_THREADS));
     //chuncks->sorted_array;// = malloc(sizeof(chuncks->array));
@@ -193,9 +190,9 @@ void init_threads(int* c_array, int size)
     pthread_t thread[NB_THREADS];
     pthread_attr_t thread_attr;
     pthread_attr_init(&thread_attr);
-    for(j=0; j < NB_THREADS; j++)
+    for(int j=0; j < NB_THREADS; j++)
     {
-        for(i=0; i < NB_THREADS-1; i++)
+        for(int i=0; i < NB_THREADS-1; i++)
         {
             //could be picked better maybe
             chuncks[j].pivots[i] = array[(size/NB_THREADS)*i];
@@ -204,7 +201,7 @@ void init_threads(int* c_array, int size)
     }
     
 
-    for(i=0; i < NB_THREADS-1; i++)
+    for(int i=0; i < NB_THREADS-1; i++)
     {
         //could be picked better maybe
         //chuncks[i].array();
@@ -219,12 +216,14 @@ void init_threads(int* c_array, int size)
     }
     */
 
-   for(i=0; i<NB_THREADS; i++){
+   for(int i=0; i<NB_THREADS; i++){
        int jump = i*size/NB_THREADS;
-       int jump2 = (i+1)*size/NB_THREADS > array.size() ? (i+1)*size/NB_THREADS  : array.size()-1;
+       int jump2 = (i+1)*size/NB_THREADS < array.size() ? (i+1)*size/NB_THREADS  : array.size()-0;
        //chuncks[i].array(array.begin()+jump, array.begin()+jump2);
        //cout << chuncks[i].array.empty() << endl;
+	cout << "jump " << jump << endl << "jump2 " << jump2 << endl;
        copy(array.begin()+jump, array.begin()+jump2, back_inserter(chuncks[i].array));
+	cout << "size of array: " << chuncks[i].array.size() << endl;
 
         chuncks[i].id = i;
         printf("%s : %i\n","creating threads", chuncks[i].id);
@@ -237,13 +236,10 @@ void init_threads(int* c_array, int size)
     }
     */
 
-   for(i=0; i<NB_THREADS; i++){
-        pthread_create(&thread[i], 
-                &thread_attr, 
-                &qs, 
-                &chuncks[i]);
+   for(int i=0; i<NB_THREADS; i++){
+        pthread_create(&thread[i],&thread_attr, &qs, &chuncks[i]);
     }
-   for(i=0; i<NB_THREADS; i++){
+   for(int i=0; i<NB_THREADS; i++){
         pthread_join(thread[i], NULL);
         //inital sorting done
     }
@@ -264,14 +260,20 @@ void init_threads(int* c_array, int size)
    }
 
     for(int j=0; j< merge_sorted.size(); j++){
-        if(j < NB_THREADS)
-            cout << "Following values should be less than pivot: " << chuncks[0].pivots[j] << endl;
+        if(j < NB_THREADS-1)
+            cout << "Following values should be less than pivot" << j <<": " << chuncks[0].pivots[j] << endl;
         //else
             //cout << "largest values:" << endl;
         cout << "list size: " << merge_sorted[j].size() << endl;
         for(int i= 0; i < merge_sorted[j].size(); i++)
         {
-            cout << merge_sorted[j][i] << endl;
+            cout << merge_sorted[j][i];
+		if(j < NB_THREADS - 1 && merge_sorted[j][i] < chuncks[0].pivots[j])
+			cout<<" correct!" << endl;
+		else if(merge_sorted[j][i] >= chuncks[0].pivots[NB_THREADS-2])
+			cout<<" correct!" << endl;
+		else
+			cout << " wrong! " << endl;
         }
     }
    //divide up the work again among the threads
@@ -313,17 +315,15 @@ static void* qs(void* input)
             if(data->array[i] < data->pivots[j])
             {
                 data->sorted_arrays[j].push_back(data->array[i]);
-                data->array.erase(data->array.begin()+i);
+                //data->array.erase(data->array.begin()+i);
                 nothing_pushed = false;
-            }
-            else if(j == NB_THREADS-2)
-            {
-                data->sorted_arrays[j+1].push_back(data->array[i]);
-                nothing_pushed = false;
+		break;
             }
         }
             if(nothing_pushed)
-                cout << "nothing was pushed!" << endl;
+		{
+			data->sorted_arrays[NB_THREADS-1].push_back(data->array[i]);
+		}
     }
     
     
