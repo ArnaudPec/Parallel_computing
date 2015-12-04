@@ -187,9 +187,6 @@ void init_threads(int* c_array_input, int size)
         array.push_back(c_array_input[i]);
     }
 
-	int i,j;
-
-     //struct chunck chuncks[NB_THREADS];// = (chunck*)malloc(sizeof(chunck));
     vector<chunck> chuncks(NB_THREADS);
     //chuncks->array = (int*)malloc(sizeof(size/NB_THREADS));
     //chuncks->sorted_array;// = malloc(sizeof(chuncks->array));
@@ -197,9 +194,9 @@ void init_threads(int* c_array_input, int size)
     pthread_t thread[NB_THREADS];
     pthread_attr_t thread_attr;
     pthread_attr_init(&thread_attr);
-    for(j=0; j < NB_THREADS; j++)
+    for(int j=0; j < NB_THREADS; j++)
     {
-        for(i=0; i < NB_THREADS-1; i++)
+        for(int i=0; i < NB_THREADS-1; i++)
         {
             //could be picked better maybe
             chuncks[j].pivots[i] = array[(size/NB_THREADS)*i];
@@ -208,7 +205,7 @@ void init_threads(int* c_array_input, int size)
     }
     
 
-    for(i=0; i < NB_THREADS-1; i++)
+    for(int i=0; i < NB_THREADS-1; i++)
     {
         //could be picked better maybe
         //chuncks[i].array();
@@ -223,7 +220,7 @@ void init_threads(int* c_array_input, int size)
     }
     */
 
-   for(i=0; i<NB_THREADS; i++){
+   for(int i=0; i<NB_THREADS; i++){
        int jump = i*size/NB_THREADS;
        int jump2 = (i+1)*size/NB_THREADS < array.size() ? (i+1)*size/NB_THREADS  : array.size()-0;
        //chuncks[i].array(array.begin()+jump, array.begin()+jump2);
@@ -242,14 +239,20 @@ void init_threads(int* c_array_input, int size)
         cout << "copied value " << chuncks[0].array[i] << endl;
     }
     */
+<<<<<<< HEAD
 	cout << "start threads for first phase of sorting around pivots" << endl;
    for(i=0; i<NB_THREADS; i++){
         pthread_create(&thread[i], 
                 &thread_attr, 
                 &qs, 
                 &chuncks[i]);
+=======
+
+   for(int i=0; i<NB_THREADS; i++){
+        pthread_create(&thread[i],&thread_attr, &qs, &chuncks[i]);
+>>>>>>> d5e08e53d9e7ddbc0550d7c36d7dcdb3f8eb3974
     }
-   for(i=0; i<NB_THREADS; i++){
+   for(int i=0; i<NB_THREADS; i++){
         pthread_join(thread[i], NULL);
         //inital sorting done
     }
