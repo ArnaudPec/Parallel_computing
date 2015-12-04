@@ -228,12 +228,11 @@ void init_threads(int* c_array_input, int size)
        int jump2 = (i+1)*size/NB_THREADS < array.size() ? (i+1)*size/NB_THREADS  : array.size()-0;
        //chuncks[i].array(array.begin()+jump, array.begin()+jump2);
        //cout << chuncks[i].array.empty() << endl;
-	cout << "jump " << jump << endl << "jump2 " << jump2 << endl;
+   	   cout << "jump " << jump << endl << "jump2 " << jump2 << endl;
        copy(array.begin()+jump, array.begin()+jump2, back_inserter(chuncks[i].array));
-	cout << "size of array: " << chuncks[i].array.size() << endl;
-
-        chuncks[i].id = i;
-        printf("%s : %i\n","creating threads", chuncks[i].id);
+	   cout << "size of array: " << chuncks[i].array.size() << endl;
+       chuncks[i].id = i;
+       printf("%s : %i\n","creating threads", chuncks[i].id);
    }
 
    /*
@@ -244,10 +243,7 @@ void init_threads(int* c_array_input, int size)
     */
 	cout << "start threads for first phase of sorting around pivots" << endl;
    for(i=0; i<NB_THREADS; i++){
-        pthread_create(&thread[i], 
-                &thread_attr, 
-                &qs, 
-                &chuncks[i]);
+        pthread_create(&thread[i], &thread_attr,&qs, &chuncks[i]);
     }
 	cout << "joinging threads..." << endl;
    for(i=0; i<NB_THREADS; i++){
@@ -303,10 +299,7 @@ void init_threads(int* c_array_input, int size)
 	/*	cout << "size of array: " << c[i]->size << endl;
 		for(j=0; j<c[i]->size; j++)
 			cout << c[i]->array[j] << endl;*/
-        pthread_create(&thread[i], 
-                &thread_attr, 
-                &simple_qsort_wrapper, 
-                c[i]);
+        pthread_create(&thread[i], &thread_attr, &simple_qsort_wrapper,c[i]);
     }
    cout << "copying to merge_sorted..." << endl;
    	for(i=0; i<NB_THREADS; i++){
@@ -325,7 +318,6 @@ void init_threads(int* c_array_input, int size)
    	for(i=0; i < NB_THREADS; i++){
 		for(j=0; j < c[i]->size; j++)
 		{
-			//cout << c[i]->array[j] << endl;
 			c_array_input[counter] = c[i]->array[j];
 			counter++;
 		}
