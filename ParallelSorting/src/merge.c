@@ -184,6 +184,14 @@ drake_run(task_t *task)
 	right_link = pelib_array_read(link_tp)(task->pred, 1);
 	parent_link = pelib_array_read(link_tp)(task->succ, 0);
 
+	cfifo_t(int) *lFifo;
+	cfifo_t(int) *rFifo;
+	cfifo_t(int) *pFifo;
+
+    lFifo = left_link->buffer;
+    rFifo = right_link->buffer;
+    pFifo = parent_link->buffer;
+
 	// Write here a sequential merge reading from fifos in left and right input links
 	// and writing merged input in parent link. Keep in mind that not all input has arrived yet
 	// and the input fifos are too smal to hold it all anyway. However, you can begin to merge
