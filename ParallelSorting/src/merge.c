@@ -190,6 +190,55 @@ drake_run(task_t *task)
 	// immediately as merging doesn't require the whole input to be started. Consuming data will
 	// make room in input links for more input to come and producing output data can make the next
 	// task in the merging tree to begin as soon as possible, maximizing pipeline parallelism.
+	//cfifo_t(int) *fifo;
+	cfifo_t(int)* left_fifo = left_link->buffer;
+	cfifo_t(int)* right_fifo = right_link->buffer;
+	cfifo_t(int)* parent_fifo = parent_link->buffer;
+	size_t left_available_elements = pelib_cfifo_length(int)(left_fifo);
+	size_t right_available_elements = pelib_cfifo_length(int)(right_fifo);
+	//printf("left fifo\n");
+	//pelib_printf(cfifo_t(int))(stdout, *left_fifo);
+	//printf("right fifo\n");
+	//pelib_printf(cfifo_t(int))(stdout, *right_fifo);
+	//check if there are elements available to read
+	int var;
+	size_t i;
+	if(left_available_elements > 0)
+	{
+		for( i = 0; i < left_available_elements; i++)
+		{
+			var = pelib_cfifo_pop(int)(left_fifo);
+			pelib_cfifo_push(int)(parent_fifo, var);
+		}
+		//return 0;
+	}
+	if(right_available_elements > 0)
+	{
+		for(i = 0; i < right_available_elements; i++)
+		{
+			var = pelib_cfifo_pop(int)(right_fifo);
+			pelib_cfifo_push(int)(parent_fifo, var);
+		}
+		//return 0;
+	}
+	if((left_link->prod == NULL || left_link->prod->status >= TASK_KILLED)
+		&&(right_link->prod == NULL || right_link->prod->status >= TASK_KILLED))
+	{
+		/*
+		if(left_link->prod == NULL || left_link->prod->status >= TASK_KILLED)
+			printf("LEFT IS DONE!\n");
+		if(right_link->prod == NULL || right_link->prod->status >= TASK_KILLED)
+			printf("RIGHT IS DONE!\n");
+			*/
+		printf("parent fifo");
+		pelib_printf(cfifo_t(int))(stdout, *parent_fifo);
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+	//printf("%zu\n", 
 
 	// The following gives useful code snippets to implement this lab
 	// 
