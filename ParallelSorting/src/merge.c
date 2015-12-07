@@ -188,9 +188,9 @@ drake_run(task_t *task)
 	cfifo_t(int) *rFifo;
 	cfifo_t(int) *pFifo;
 
-    lFifo = left_link->buffer;
-    rFifo = right_link->buffer;
-    pFifo = parent_link->buffer;
+	lFifo = left_link->buffer;
+	rFifo = right_link->buffer;
+	pFifo = parent_link->buffer;
 
 	// Write here a sequential merge reading from fifos in left and right input links
 	// and writing merged input in parent link. Keep in mind that not all input has arrived yet
@@ -199,36 +199,43 @@ drake_run(task_t *task)
 	// make room in input links for more input to come and producing output data can make the next
 	// task in the merging tree to begin as soon as possible, maximizing pipeline parallelism.
 	//cfifo_t(int) *fifo;
+
 	cfifo_t(int)* left_fifo = left_link->buffer;
 	cfifo_t(int)* right_fifo = right_link->buffer;
 	cfifo_t(int)* parent_fifo = parent_link->buffer;
+
 	size_t left_available_elements = pelib_cfifo_length(int)(left_fifo);
 	size_t right_available_elements = pelib_cfifo_length(int)(right_fifo);
+
 	//printf("left fifo\n");
 	//pelib_printf(cfifo_t(int))(stdout, *left_fifo);
 	//printf("right fifo\n");
 	//pelib_printf(cfifo_t(int))(stdout, *right_fifo);
 	//check if there are elements available to read
+
 	int var;
-	size_t i;
-	if(left_available_elements > 0)
+	size_t size = left_available_elements+right_available_elements;
+	int vars[size];
+	int counter = 0;
+	size_t i, j;
+	while(left_available_elements > 0)
 	{
-		for( i = 0; i < left_available_elements; i++)
-		{
-			var = pelib_cfifo_pop(int)(left_fifo);
-			pelib_cfifo_push(int)(parent_fifo, var);
-		}
-		//return 0;
+		vars[counter] = pelib_cfifo_pop(int)(left_fifo);
+		counter++;
+		left_available_elements--;
 	}
-	if(right_available_elements > 0)
+	while(right_available_elements > 0 )
 	{
-		for(i = 0; i < right_available_elements; i++)
-		{
-			var = pelib_cfifo_pop(int)(right_fifo);
-			pelib_cfifo_push(int)(parent_fifo, var);
-		}
-		//return 0;
+		vars[counter] = pelib_cfifo_pop(int)(right_fifo);
+		counter++;
+		right_available_elements--;
 	}
+
+	sort(vars, size); //allowed?
+
+	for(j =0; j < size ; j++)
+		pelib_cfifo_push(int)(parent_fifo, vars[j]);
+
 	if((left_link->prod == NULL || left_link->prod->status >= TASK_KILLED)
 		&&(right_link->prod == NULL || right_link->prod->status >= TASK_KILLED))
 	{
@@ -238,8 +245,8 @@ drake_run(task_t *task)
 		if(right_link->prod == NULL || right_link->prod->status >= TASK_KILLED)
 			printf("RIGHT IS DONE!\n");
 			*/
-		printf("parent fifo");
-		pelib_printf(cfifo_t(int))(stdout, *parent_fifo);
+		//printf("parent fifo");
+		//pelib_printf(cfifo_t(int))(stdout, *parent_fifo);
 		return 1;
 	}
 	else
