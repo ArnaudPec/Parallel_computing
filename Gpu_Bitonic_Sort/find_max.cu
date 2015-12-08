@@ -3,12 +3,32 @@
 #include <stdio.h>
 #include "milli.c"
 
+const int tx = 256;
+const int ty = 1;
+const int threads_per_block = tx * ty;
+const int gx = 256;
+const int gy = 1;
+const int blocks_per_grid = gx * gy;
 __global__ void find_max(int *data, int N)
 {
-  int i;
-  i = threadIdx.x + blockDim.x*blockIdx.x;
+	__shared__ int cache[threads_per_block];
+	int tid = threadIdx.x;
+	int i = threadIdx.x + blockDim.x * blockIdx.x;
+	cache[tid] = data[i];
+	__syncthreads();
 
-	// Write your CUDA kernel here
+	for (int s = 1; s < blockDim.x; s*=2)
+	{
+		if(tid % (2*s) == 0)
+		{
+			if(cache[tid] < cache[tid + s])
+				cache[tid] = cache[tid + s];
+		}
+		__syncthreads();
+	}
+	//if(tid==0)
+	data[i] = cache[tid];
+
 }
 
 void launch_cuda_kernel(int *data, int N)
@@ -19,17 +39,32 @@ void launch_cuda_kernel(int *data, int N)
 	int size = sizeof(int) * N;
 	cudaMalloc( (void**)&devdata, size);
 	cudaMemcpy(devdata, data, size, cudaMemcpyHostToDevice );
-	
+/*	
+	int i;
+	for(i = 0; i < N; i++)
+	{
+		printf("%i\n", data[i]);
+	}
+*/
 	// Dummy launch
-	dim3 dimBlock( 8, 1 );
-	dim3 dimGrid( 8, 1 );
+	dim3 dimBlock( tx, ty );
+	dim3 dimGrid( gx, gy );
 	find_max<<<dimGrid, dimBlock>>>(devdata, N);
 	cudaError_t err = cudaPeekAtLastError();
 	if (err) printf("cudaPeekAtLastError %d %s\n", err, cudaGetErrorString(err));
 
 	// Only the result needs copying!
-	cudaMemcpy(data, devdata, sizeof(int), cudaMemcpyDeviceToHost ); 
+	cudaMemcpy(data, devdata, size, cudaMemcpyDeviceToHost ); 
+	printf("the outputed numbers\n");
+/*
+	for(i = 0; i < N; i++)
+	{
+		printf("%i\n", data[i]);
+	}
+*/
 	cudaFree(devdata);
+	printf("%i > %i", data[0], data[N/2]);
+	data[0] = data[0]>data[N/2]?data[0]:data[N/2];
 }
 
 // CPU max finder (sequential)
@@ -46,21 +81,23 @@ void find_max_cpu(int *data, int N)
 	data[0] = m;
 }
 
-#define SIZE 1024
+#define SIZE 128
 //#define SIZE 16
 // Dummy data in comments below for testing
-int data[SIZE];// = {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
+int data[SIZE] ;//= {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
 int data2[SIZE];// = {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
 
 int main()
 {
   // Generate 2 copies of random data
+
   srand(time(NULL));
   for (long i=0;i<SIZE;i++)
   {
     data[i] = rand() % (SIZE * 5);
     data2[i] = data[i];
   }
+
   
   // The GPU will not easily beat the CPU here!
   // Reduction needs optimizing or it will be slow.
