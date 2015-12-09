@@ -47,12 +47,22 @@ int main()
   ResetMilli();
   bitonic_gpu(data2, SIZE);
   printf("%f\n", GetSeconds());
+  
+  for (int i=0;i<SIZE;i++)
+    {
+      printf("%d:%d\n",i, data[i]);
+    }
+  printf("GPU:\n");
+  for (int i=0;i<SIZE;i++)
+    {
+      printf("%d:%d\n",i, data2[i]);
+    }
 
   for (int i=0;i<SIZE;i++)
     if (data[i] != data2[i])
     {
       printf("Error at %d ", i);
-      return(1);
+     // return(1);
     }
 
   // Print result
