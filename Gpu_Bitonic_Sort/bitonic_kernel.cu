@@ -58,7 +58,7 @@ __global__ void bitonic_one_block(int *data, int N)
 
 __global__ void bitonic(int *data, int j, int k)
 {
-    i = threadIdx.x + blockDim.x*blockIdx.x;
+    int i = threadIdx.x + blockDim.x*blockIdx.x;
     int ixj=i^j; // Calculate indexing!
     if ((ixj)>i)
     {
@@ -73,9 +73,9 @@ void bitonic_gpu(int *data, int N){
     const int size = N*sizeof(int);
 
     cudaMalloc((void**)&d_data, size);
-
-    dim3 dimBlock(N);
-    dim3 dimGrid(N/512);
+    int mininal_size = min(N,512); //bc the size should not be more than 512
+    dim3 dimBlock(mininal_size);
+    dim3 dimGrid(N/512+1);// number of grid + remaining chunck
 
     cudaMemcpy(d_data, data, size,cudaMemcpyHostToDevice);
 
