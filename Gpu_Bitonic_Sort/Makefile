@@ -5,3 +5,5 @@ max:
 bitonic : 
 	nvcc -c milli.c bitonic_kernel.cu bitonic_main.cpp
 	nvcc -o bitonic bitonic_kernel.o bitonic_main.o
+clean :
+	rm -f *o bitonic 
