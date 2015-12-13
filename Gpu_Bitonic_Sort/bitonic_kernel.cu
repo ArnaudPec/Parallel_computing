@@ -75,10 +75,11 @@ void bitonic_gpu(int *data, int N){
     cudaMalloc((void**)&d_data, size);
     int mininal_size = min(N,512); //bc the size should not be more than 512
     dim3 dimBlock(mininal_size);
-    dim3 dimGrid(N/512+1);// number of grid + remaining chunck
+    dim3 dimGrid(N/512+1);// number of grid (blocks?) + remaining chunck
 
     cudaMemcpy(d_data, data, size,cudaMemcpyHostToDevice);
 
+	//necessary for using multiple blocks?
     for (k=2;k<=N;k=2*k) 
     {
         for (j=k>>1;j>0;j=j>>1) 

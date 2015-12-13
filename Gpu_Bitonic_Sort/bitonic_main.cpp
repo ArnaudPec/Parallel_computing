@@ -4,12 +4,23 @@
 
 #include "bitonic_kernel.h"
 #include <stdio.h>
+#include <math.h>
 #include "milli.h"
 
-#define SIZE 32 
+#define SIZE 65536
 #define MAXPRINTSIZE 32
-int data[SIZE] = {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54,1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
-int data2[SIZE] = {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54, 1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
+int data[SIZE];// = {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54,1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
+int data2[SIZE];// = {1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54, 1, 2, 5, 3, 6, 8, 5, 3, 1, 65, 8, 5, 3, 34, 2, 54};
+
+void generate_bitonic_list()
+{
+	for(int i = 0, j = SIZE; i < SIZE && j > 0; i++, j--)
+	{
+		//data[i] = i % 2 == 0 ? i : j;
+		data[i] = j;
+		data2[i] = data[i];
+	}
+}
 
 static void exchange(int *i, int *j)
 {
@@ -41,6 +52,7 @@ void bitonic_cpu(int *data, int N)
 
 int main()
 {
+	generate_bitonic_list();
   ResetMilli();
   bitonic_cpu(data, SIZE);
   printf("%f\n", GetSeconds());
@@ -48,6 +60,7 @@ int main()
   bitonic_gpu(data2, SIZE);
   printf("%f\n", GetSeconds());
   
+  /*
   for (int i=0;i<SIZE;i++)
     {
       printf("%d:%d\n",i, data[i]);
@@ -57,7 +70,7 @@ int main()
     {
       printf("%d:%d\n",i, data2[i]);
     }
-
+	*/
   for (int i=0;i<SIZE;i++)
     if (data[i] != data2[i])
     {
