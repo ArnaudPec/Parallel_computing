@@ -7238,7 +7238,62 @@ merge_run_task_6(task_t *task)
  left_link = pelib_array_link_tp_read(task->pred, 0);
  right_link = pelib_array_link_tp_read(task->pred, 1);
  parent_link = pelib_array_link_tp_read(task->succ, 0);
-# 323 "merge.c"
+
+ cfifo_int_t *lFifo;
+ cfifo_int_t *rFifo;
+ cfifo_int_t *pFifo;
+
+ lFifo = left_link->buffer;
+ rFifo = right_link->buffer;
+ pFifo = parent_link->buffer;
+# 203 "merge.c"
+ cfifo_int_t* left_fifo = left_link->buffer;
+ cfifo_int_t* right_fifo = right_link->buffer;
+ cfifo_int_t* parent_fifo = parent_link->buffer;
+
+ size_t left_available_elements = pelib_cfifo_int_length(left_fifo);
+ size_t right_available_elements = pelib_cfifo_int_length(right_fifo);
+
+
+
+
+
+
+
+ int var;
+ size_t size = left_available_elements+right_available_elements;
+ int vars[size];
+ int counter = 0;
+ size_t i, j;
+ while(left_available_elements > 0)
+ {
+  vars[counter] = pelib_cfifo_int_pop(left_fifo);
+  counter++;
+  left_available_elements--;
+ }
+ while(right_available_elements > 0 )
+ {
+  vars[counter] = pelib_cfifo_int_pop(right_fifo);
+  counter++;
+  right_available_elements--;
+ }
+
+ sort(vars, size);
+
+ for(j =0; j < size ; j++)
+  pelib_cfifo_int_push(parent_fifo, vars[j]);
+
+ if((left_link->prod == ((void *)0) || left_link->prod->status >= TASK_KILLED)
+  &&(right_link->prod == ((void *)0) || right_link->prod->status >= TASK_KILLED))
+ {
+# 250 "merge.c"
+  return 1;
+ }
+ else
+ {
+  return 0;
+ }
+# 387 "merge.c"
  return 1;
 }
 

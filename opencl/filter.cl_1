@@ -1,0 +1,86 @@
+/*
+ * Image filter in OpenCL
+ */
+
+#define KERNELSIZE 2
+
+__kernel void filter(__global unsigned char *image, __global unsigned char *out, const unsigned int n, const unsigned int m)
+{ 
+  unsigned int i = get_global_id(1) % 512;
+  unsigned int j = get_global_id(0) % 512;
+  int k, l;
+  unsigned int sumx, sumy, sumz;
+
+	int divby = (2*KERNELSIZE+1)*(2*KERNELSIZE+1);
+	
+	
+	unsigned int il = get_local_id(1);
+	unsigned int jl = get_local_id(0);
+
+	__local unsigned char lc[20*20*3];
+	
+
+	if (i >= KERNELSIZE && i < m-KERNELSIZE && j >= KERNELSIZE && j < n-KERNELSIZE)
+	  {
+	    // [-2 ,-2]
+	    unsigned int indexLocal = ((il - KERNELSIZE + KERNELSIZE) * 20 + (jl - KERNELSIZE + KERNELSIZE))*3;
+	    unsigned int indexGlobal = ((i - KERNELSIZE + KERNELSIZE)*n + j - KERNELSIZE + KERNELSIZE) *3;
+	    lc[indexLocal + 0 ] = image[indexGlobal + 0]; 
+	    lc[indexLocal + 1 ] = image[indexGlobal + 1]; 
+	    lc[indexLocal + 2 ] = image[indexGlobal + 2]; 
+	    
+	    // [ -2, +2]
+	    indexLocal = ((il + KERNELSIZE + KERNELSIZE) * 20 + (jl - KERNELSIZE + KERNELSIZE))*3;
+	    indexGlobal = ((i + KERNELSIZE + KERNELSIZE)*n + j - KERNELSIZE + KERNELSIZE) *3;
+	    
+	    lc[indexLocal + 0 ] = image[indexGlobal + 0]; 
+	    lc[indexLocal + 1 ] = image[indexGlobal + 1]; 
+	    lc[indexLocal + 2 ] = image[indexGlobal + 2]; 
+	    
+	    // [2,2]
+	    indexLocal = ((il + KERNELSIZE + KERNELSIZE) * 20 + (jl + KERNELSIZE + KERNELSIZE))*3;
+	    indexGlobal = ((i + KERNELSIZE + KERNELSIZE)*n + j + KERNELSIZE + KERNELSIZE) *3;
+	    
+	    lc[indexLocal + 0 ] = image[indexGlobal + 0]; 
+	    lc[indexLocal + 1 ] = image[indexGlobal + 1]; 
+	    lc[indexLocal + 2 ] = image[indexGlobal + 2]; 
+	    
+	    
+	    // [2,-2]
+	    indexLocal = ((il - KERNELSIZE + KERNELSIZE) * 20 + (jl + KERNELSIZE + KERNELSIZE))*3;
+	    indexGlobal = ((i - KERNELSIZE + KERNELSIZE)*n + j + KERNELSIZE + KERNELSIZE) *3;
+	    
+	    lc[indexLocal + 0 ] = image[indexGlobal + 0]; 
+	    lc[indexLocal + 1 ] = image[indexGlobal + 1]; 
+	    lc[indexLocal + 2 ] = image[indexGlobal + 2];
+	    
+	    
+	    barrier(CLK_LOCAL_MEM_FENCE);
+	    
+	    
+	    
+	    
+	    
+	    
+	    // Filter kernel
+	    sumx=0;sumy=0;sumz=0;
+	    for(k=-KERNELSIZE;k<=KERNELSIZE;k++)
+	      for(l=-KERNELSIZE;l<=KERNELSIZE;l++)	
+		{
+		  
+		  sumx += lc[((il + KERNELSIZE + k)*20+(jl+KERNELSIZE+l))*3+0];
+		  sumy += lc[((il+KERNELSIZE+k)*20+(jl+KERNELSIZE+l))*3+1];
+		  sumz += lc[((il+KERNELSIZE+k)*20+(jl+KERNELSIZE+l))*3+2];
+		}
+	    out[(i*n+j)*3+0] = sumx/divby;
+	    out[(i*n+j)*3+1] = sumy/divby;
+	    out[(i*n+j)*3+2] = sumz/divby;
+	  }
+	else
+	  // Edge pixels are not filtered
+	  {
+	    out[(i*n+j)*3+0] = image[(i*n+j)*3+0];
+	    out[(i*n+j)*3+1] = image[(i*n+j)*3+1];
+	    out[(i*n+j)*3+2] = image[(i*n+j)*3+2];
+	  }
+}

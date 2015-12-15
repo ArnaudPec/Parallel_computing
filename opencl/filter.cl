@@ -3,172 +3,117 @@
  */
 
 #define KERNELSIZE 2
-#define WORK_GROUP_DIM 16
-#define LOCAL_INNER_SIZE 16*16*3
-#define LOCAL_OUTER_SIZE 18*18*3
-#define LOCAL true
-
+/*#define LOCAL false */
+/*#if LOCAL //that is run algorithm using local memory*/
 __kernel void filter(__global unsigned char *image, __global unsigned char *out, const unsigned int n, const unsigned int m)
 { 
-	unsigned int i = get_global_id(1) % 512;
-	unsigned int j = get_global_id(0) % 512;
+    unsigned int i = get_global_id(1) % 512;
+    unsigned int j = get_global_id(0) % 512;
 
-	//size_t wg_i = get_group_id(1) % WORK_GROUP_DIM*2;
-	//size_t wg_j = get_group_id(0) % WORK_GROUP_DIM*2;
+    //size of local image
+    unsigned const local_n = 20;
+    unsigned const local_m = 20;
 
-	//size of local image
-	unsigned local_n = n/32;
-	unsigned local_m = m/32;
-	//unsigned local_m = m/32;
-	unsigned local_i = get_local_id(1);//i + wg_i * WORK_GROUP_DIM;
-	unsigned local_j = get_local_id(0);//i + wg_i * WORK_GROUP_DIM;
+    unsigned local_i = get_local_id(1);//i + wg_i * WORK_GROUP_DIM;
+    unsigned local_j = get_local_id(0);//i + wg_i * WORK_GROUP_DIM;
 
-	__local unsigned char local_image[LOCAL_OUTER_SIZE]; // will contain part of image to be blurred and necessary surrounding pixels
-	//__local unsigned char local_out[LOCAL_INNER_SIZE]; // will contain the blurred imaged without the surrounding pixels
-	unsigned local_v = (local_i * local_n + local_j) * 3;
-	unsigned local_inner = (local_i * local_n + local_j) * 3;
-	unsigned v = (i*n+j)*3;
+    __local unsigned char local_image[20*20*3]; // will contain part of image to be blurred and necessary surrounding pixels
+    unsigned local_v = (local_i * local_n + local_j) * 3;
+    unsigned v = (i*n+j)*3;
 
-	//just a test of copying image to out;
-	/*
-	   out[(i*n+j)*3+0] = image[v+0];
-	   out[(i*n+j)*3+1] = image[v+1];
-	   out[(i*n+j)*3+2] = image[v+2];
-	 */
-	//read part of image into local memory. 
-	//read the pixel to be moddified into local memory
-	//local_image[local_v+0] = image[v+0];
-	//local_image[local_v+1] = image[v+1];
-	//local_image[local_v+2] = image[v+2];
-	//local_image[local_inner+0] = image[v+0];
-	//local_image[local_inner+1] = image[v+1];
-	//local_image[local_inner+2] = image[v+2];
+    //read in the surrounding 24 pixels 
 
-	int k, l;
-	//read in the surrounding 24 pixels 
+    if (i >= KERNELSIZE && i < m-KERNELSIZE && j >= KERNELSIZE && j < n-KERNELSIZE)
+    {
+        // [-2 ,-2]
+        unsigned int indexLocal = ((local_i- KERNELSIZE + KERNELSIZE) * local_n + (local_j - KERNELSIZE + KERNELSIZE))*3;
+        unsigned int indexGlobal = ((i - KERNELSIZE + KERNELSIZE)*n + j - KERNELSIZE + KERNELSIZE) *3;
+        local_image[indexLocal + 0 ] = image[indexGlobal + 0]; 
+        local_image[indexLocal + 1 ] = image[indexGlobal + 1]; 
+        local_image[indexLocal + 2 ] = image[indexGlobal + 2]; 
 
-	//int large_kernel = KERNELSIZE * 2;
-	//if (local_i >= large_kernel && local_i < local_m-large_kernel && local_j >= large_kernel && j < n-large_kernel)
-	//	if (i >= n- large_kernel && i < m-large_kernel && j >= large_kernel&& j < n-large_kernel)
-	//if (local_i >= KERNELSIZE && local_i < local_m-KERNELSIZE && local_j >= KERNELSIZE && j < n-KERNELSIZE)
-    if (i >= KERNELSIZE && i < m-KERNELSIZE && j >= KERNELSIZE && j < n-KERNELSIZE )
-	//if (local_i+2 >= KERNELSIZE && local_i+2 < local_m-KERNELSIZE && local_j+2 >= KERNELSIZE && j+2 < n-KERNELSIZE)
-	//	if (i+2 >= KERNELSIZE && i+2 < m-KERNELSIZE && j+2 >= KERNELSIZE && j+2 < n-KERNELSIZE )
-		{
-		    char c[75];
-		    int counter =0;
-			//access all the surrounding elements
-			for(k=-KERNELSIZE;k<=KERNELSIZE;k++)
-				for(l=-KERNELSIZE;l<=KERNELSIZE;l++)	
-				{
-                    unsigned index = ((i+k)*n+(j+l))*3;
-                    c[counter] = image[index + 0];
-                    c[counter+1] = image[index + 1];
-                    c[counter+2] = image[index + 2];
-                    counter +=3;
-				}
+        // [ -2, +2]
+        indexLocal = ((local_i+ KERNELSIZE + KERNELSIZE) * local_n + (local_j - KERNELSIZE + KERNELSIZE))*3;
+        indexGlobal = ((i + KERNELSIZE + KERNELSIZE)*n + j - KERNELSIZE + KERNELSIZE) *3;
 
-            counter = 0;
-			for(k=-KERNELSIZE;k<=KERNELSIZE;k++)
-				for(l=-KERNELSIZE;l<=KERNELSIZE;l++)	
-				{
-                    unsigned local_index;
-                    if(local_j >= 2)
-                        local_index = ((local_i+2+k)*(local_n)+(local_j+l))*3;
-                    else if(local_j >=1)
-                        local_index = ((local_i+2+k)*(local_n)+(local_j+1+l))*3;
-                    else
-                        local_index = ((local_i+2+k)*(local_n)+(local_j+2+l))*3;
+        local_image[indexLocal + 0 ] = image[indexGlobal + 0]; 
+        local_image[indexLocal + 1 ] = image[indexGlobal + 1]; 
+        local_image[indexLocal + 2 ] = image[indexGlobal + 2]; 
 
-                    local_image[local_index+0] = c[counter+0]; 
-                    local_image[local_index+1] = c[counter+1];
-                    local_image[local_index+2] = c[counter+2];
-                    counter+=3;
-                }
-		}
-        else
-            // Edge pixels are not filtered
-        {
-            local_image[local_v+0] = image[v+0];
-            local_image[local_v+1] = image[v+1];
-            local_image[local_v+2] = image[v+2];
-        }
+        // [2,2]
+        indexLocal = ((local_i+ KERNELSIZE + KERNELSIZE) * local_n + (local_j + KERNELSIZE + KERNELSIZE))*3;
+        indexGlobal = ((i + KERNELSIZE + KERNELSIZE)*n + j + KERNELSIZE + KERNELSIZE) *3;
 
-	barrier(CLK_LOCAL_MEM_FENCE);
+        local_image[indexLocal + 0 ] = image[indexGlobal + 0]; 
+        local_image[indexLocal + 1 ] = image[indexGlobal + 1]; 
+        local_image[indexLocal + 2 ] = image[indexGlobal + 2]; 
 
-	unsigned int sumx, sumy, sumz;
-	int divby = (2*KERNELSIZE+1)*(2*KERNELSIZE+1);
-#if LOCAL //that is run algorithm using local memory
-	//IMAGES SHOULD BE CALCULATED IN LOCAL MEMORY AND THEN WRITTEN TO GLOBAL
+        // [2,-2]
+        indexLocal = ((local_i- KERNELSIZE + KERNELSIZE) * local_n + (local_j + KERNELSIZE + KERNELSIZE))*3;
+        indexGlobal = ((i - KERNELSIZE + KERNELSIZE)*n + j + KERNELSIZE + KERNELSIZE) *3;
+
+        local_image[indexLocal + 0 ] = image[indexGlobal + 0]; 
+        local_image[indexLocal + 1 ] = image[indexGlobal + 1]; 
+        local_image[indexLocal + 2 ] = image[indexGlobal + 2];
+
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        /*barrier(CLK_LOCAL_MEM_FENCE);*/
+
+        unsigned int sumx, sumy, sumz;
+        int divby = (2*KERNELSIZE+1)*(2*KERNELSIZE+1);
+        //IMAGES SHOULD BE CAlocal_imageULATED IN LOCAL MEMORY AND THEN WRITTEN TO GLOBAL
+        // Filter kernel
+        sumx=0;sumy=0;sumz=0;
+        for(int k=-KERNELSIZE;k<=KERNELSIZE;k++)
+            for(int l=-KERNELSIZE;l<=KERNELSIZE;l++)	
+            {
+                unsigned local_index = ((local_i+KERNELSIZE+k)*(local_n)+(local_j+KERNELSIZE+l))*3;
+                sumx += local_image[local_index + 0];
+                sumy += local_image[local_index + 1];
+                sumz += local_image[local_index + 2];
+            }
+
+        out[v+0] = sumx/divby;
+        out[v+1] = sumy/divby;
+        out[v+2] = sumz/divby;
+        //barrier(CLK_LOCAL_MEM_FENCE);
+    }
+    else
+        // Edge pixels are not filtered
+    {
+        out[v+0] = image[v+0];
+        out[v+1] = image[v+1];
+        out[v+2] = image[v+2];
+    }
+}
+/*#else //ORIGINAL*/
 	/*if (j < n && i < m) // If inside image*/
 	/*{*/
-
-		/*if (local_i >= KERNELSIZE && i < m-KERNELSIZE && local_j >= KERNELSIZE && j < n-KERNELSIZE)*/
-			/*//if (i >= KERNELSIZE && i < m-KERNELSIZE && j >= KERNELSIZE && j < n-KERNELSIZE)*/
-			/*{*/
-				/*// Filter kernel*/
-				/*sumx=0;sumy=0;sumz=0;*/
-				/*for(k=-KERNELSIZE;k<=KERNELSIZE;k++)*/
-					/*for(l=-KERNELSIZE;l<=KERNELSIZE;l++)	*/
-					/*{*/
-						/*//unsigned index = ((i+k)*n+(j+l))*3;*/
-						/*unsigned local_index = ((local_i+k)*(local_n)+(local_j+l))*3;*/
-						/*sumx += local_image[local_index + 0];*/
-						/*sumy += local_image[local_index + 1];*/
-						/*sumz += local_image[local_index + 2];*/
-					/*}*/
-				/*local_image[local_v+0] = sumx/divby;*/
-				/*local_image[local_v+1] = sumy/divby;*/
-				/*local_image[local_v+2] = sumz/divby;*/
-				/*//barrier(CLK_LOCAL_MEM_FENCE);*/
-			/*}*/
-			/*else*/
-				/*// Edge pixels are not filtered*/
-			/*{*/
-				/*local_image[local_v+0] = local_image[local_v+0];*/
-				/*local_image[local_v+1] = local_image[local_v+1];*/
-				/*local_image[local_v+2] = local_image[local_v+2];*/
-			/*}*/
+		/*if (i >= KERNELSIZE && i < m-KERNELSIZE && j >= KERNELSIZE && j < n-KERNELSIZE)*/
+		/*{*/
+			/*// Filter kernel*/
+			/*sumx=0;sumy=0;sumz=0;*/
+			/*for(int k=-KERNELSIZE;k<=KERNELSIZE;k++)*/
+				/*for(int l=-KERNELSIZE;l<=KERNELSIZE;l++)    */
+				/*{*/
+					/*sumx += image[((i+k)*n+(j+l))*3+0];*/
+					/*sumy += image[((i+k)*n+(j+l))*3+1];*/
+					/*sumz += image[((i+k)*n+(j+l))*3+2];*/
+				/*}*/
+			/*out[(i*n+j)*3+0] = sumx/divby;*/
+			/*out[(i*n+j)*3+1] = sumy/divby;*/
+			/*out[(i*n+j)*3+2] = sumz/divby;*/
+		/*}*/
+		/*else*/
+			/*// Edge pixels are not filtered*/
+		/*{*/
+			/*out[(i*n+j)*3+0] = image[(i*n+j)*3+0];*/
+			/*out[(i*n+j)*3+1] = image[(i*n+j)*3+1];*/
+			/*out[(i*n+j)*3+2] = image[(i*n+j)*3+2];*/
+		/*}*/
 	/*}*/
-	barrier(CLK_LOCAL_MEM_FENCE);
-	out[(i*n+j)*3+0] = local_image[local_v+0];
-	out[(i*n+j)*3+1] = local_image[local_v+1];
-	out[(i*n+j)*3+2] = local_image[local_v+2];
-	//out[(i*n+j)*3+0] = local_image[local_inner+0];
-	//out[(i*n+j)*3+1] = local_image[local_inner+1];
-	//out[(i*n+j)*3+2] = local_image[local_inner+2];
-	//out[(i*n+j)*3+0] = local_image[local_v+0];
-	//out[(i*n+j)*3+1] = local_image[local_v+1];
-	//out[(i*n+j)*3+2] = local_image[local_v+2];
-	//barrier(CLK_LOCAL_MEM_FENCE);
 
-#else //ORIGINAL
-	if (j < n && i < m) // If inside image
-	{
-		if (i >= KERNELSIZE && i < m-KERNELSIZE && j >= KERNELSIZE && j < n-KERNELSIZE)
-		{
-			// Filter kernel
-			sumx=0;sumy=0;sumz=0;
-			for(k=-KERNELSIZE;k<=KERNELSIZE;k++)
-				for(l=-KERNELSIZE;l<=KERNELSIZE;l++)    
-				{
-					sumx += image[((i+k)*n+(j+l))*3+0];
-					sumy += image[((i+k)*n+(j+l))*3+1];
-					sumz += image[((i+k)*n+(j+l))*3+2];
-				}
-			out[(i*n+j)*3+0] = sumx/divby;
-			out[(i*n+j)*3+1] = sumy/divby;
-			out[(i*n+j)*3+2] = sumz/divby;
-		}
-		else
-			// Edge pixels are not filtered
-		{
-			out[(i*n+j)*3+0] = image[(i*n+j)*3+0];
-			out[(i*n+j)*3+1] = image[(i*n+j)*3+1];
-			out[(i*n+j)*3+2] = image[(i*n+j)*3+2];
-		}
-	}
+/*#endif*/
 
-#endif
-
-}
+/*}*/

@@ -29545,7 +29545,7 @@ using namespace std;
 struct chunck{
     int id;
     vector<int> array;
-    int pivots[2 -1];
+    int pivots[4 -1];
     vector<vector<int> > sorted_arrays;
  vector<int> actual_sortings;
 };
@@ -29714,34 +29714,34 @@ void init_threads(int* c_array_input, int size)
  int i,j;
 
 
-    vector<chunck> chuncks(2);
+    vector<chunck> chuncks(4);
 
 
 
-    pthread_t thread[2];
+    pthread_t thread[4];
     pthread_attr_t thread_attr;
     pthread_attr_init(&thread_attr);
-    for(j=0; j < 2; j++)
+    for(j=0; j < 4; j++)
     {
-        for(i=0; i < 2 -1; i++)
+        for(i=0; i < 4 -1; i++)
         {
 
-            chuncks[j].pivots[i] = array[(size/2)*i];
+            chuncks[j].pivots[i] = array[(size/4)*i];
         }
-        simple_quicksort(chuncks[i].pivots, 2 -1);
+        simple_quicksort(chuncks[i].pivots, 4 -1);
     }
 
 
-    for(i=0; i < 2 -1; i++)
+    for(i=0; i < 4 -1; i++)
     {
 
 
         printf("%s %i: %i\n","pivot ", i, chuncks[i].pivots[i]);
     }
 # 226 "sort.cpp"
-   for(i=0; i<2; i++){
-       int jump = i*size/2;
-       int jump2 = (i+1)*size/2 < array.size() ? (i+1)*size/2 : array.size()-0;
+   for(i=0; i<4; i++){
+       int jump = i*size/4;
+       int jump2 = (i+1)*size/4 < array.size() ? (i+1)*size/4 : array.size()-0;
 
 
        cout << "jump " << jump << endl << "jump2 " << jump2 << endl;
@@ -29758,18 +29758,18 @@ void init_threads(int* c_array_input, int size)
 
 
  cout << "start threads for first phase of sorting around pivots" << endl;
-   for(i=0; i<2; i++){
+   for(i=0; i<4; i++){
         pthread_create(&thread[i], &thread_attr,&qs, &chuncks[i]);
     }
  cout << "joinging threads..." << endl;
-   for(i=0; i<2; i++){
+   for(i=0; i<4; i++){
         pthread_join(thread[i], __null);
 
     }
  cout << "Done!" << endl;
 
 
-   vector<vector<int > > merge_sorted (2);
+   vector<vector<int > > merge_sorted (4);
 
 
 
@@ -29785,9 +29785,9 @@ void init_threads(int* c_array_input, int size)
    }
  cout << "Done!" << endl;
 # 292 "sort.cpp"
-   struct c_array* c[2];
+   struct c_array* c[4];
    cout << "thread starting for final sorting phase" << endl;
-   for(i=0; i<2; i++){
+   for(i=0; i<4; i++){
 
      c[i] = vector_to_c_array(merge_sorted[i]);
 
@@ -29798,7 +29798,7 @@ void init_threads(int* c_array_input, int size)
         pthread_create(&thread[i], &thread_attr, &simple_qsort_wrapper,c[i]);
     }
    cout << "copying to merge_sorted..." << endl;
-    for(i=0; i<2; i++){
+    for(i=0; i<4; i++){
         pthread_join(thread[i], __null);
     }
    cout << "done!" << endl;
@@ -29811,7 +29811,7 @@ void init_threads(int* c_array_input, int size)
 
  cout << "concatenating arrays." << endl;
  int counter = 0;
-    for(i=0; i < 2; i++){
+    for(i=0; i < 4; i++){
   for(j=0; j < c[i]->size; j++)
   {
    c_array_input[counter] = c[i]->array[j];
@@ -29850,7 +29850,7 @@ static void* qs(void* input)
 {
     struct chunck* data;
     data = (struct chunck*) input;
-    for(int i = 0;i < 2; i++)
+    for(int i = 0;i < 4; i++)
     {
         data->sorted_arrays.push_back(*new vector<int>());
     }
@@ -29862,7 +29862,7 @@ static void* qs(void* input)
 
 
         bool nothing_pushed = true;
-        for(int j = 0; j < 2 -1; j++)
+        for(int j = 0; j < 4 -1; j++)
         {
 
             if(data->array[i] < data->pivots[j])
@@ -29875,7 +29875,7 @@ static void* qs(void* input)
         }
   if(nothing_pushed)
   {
-   data->sorted_arrays[2 -1].push_back(data->array[i]);
+   data->sorted_arrays[4 -1].push_back(data->array[i]);
   }
     }
  cout << "thread" << data->id << " done with qs!" << endl;
