@@ -180,7 +180,7 @@ void init_threads(int* c_array_input, int size)
 	//checkk size
 	//cout << "size of int pointed to " << sizeof(c_array_input[0]) << endl;
 	//cout << "size of regular int " << sizeof(int) << endl;
-	cout << "size of array before sorting " << sizeof(int)*size << endl;
+	//cout << "size of array before sorting " << sizeof(int)*size << endl;
     vector<int> array;
     for(int i = 0; i < size; i++)
     {
@@ -228,9 +228,9 @@ void init_threads(int* c_array_input, int size)
        int jump2 = (i+1)*size/NB_THREADS < array.size() ? (i+1)*size/NB_THREADS  : array.size()-0;
        //chuncks[i].array(array.begin()+jump, array.begin()+jump2);
        //cout << chuncks[i].array.empty() << endl;
-   	   cout << "jump " << jump << endl << "jump2 " << jump2 << endl;
+   	   //cout << "jump " << jump << endl << "jump2 " << jump2 << endl;
        copy(array.begin()+jump, array.begin()+jump2, back_inserter(chuncks[i].array));
-	   cout << "size of array: " << chuncks[i].array.size() << endl;
+	   //cout << "size of array: " << chuncks[i].array.size() << endl;
        chuncks[i].id = i;
        printf("%s : %i\n","creating threads", chuncks[i].id);
    }
@@ -241,16 +241,16 @@ void init_threads(int* c_array_input, int size)
         cout << "copied value " << chuncks[0].array[i] << endl;
     }
     */
-	cout << "start threads for first phase of sorting around pivots" << endl;
+	//cout << "start threads for first phase of sorting around pivots" << endl;
    for(i=0; i<NB_THREADS; i++){
         pthread_create(&thread[i], &thread_attr,&qs, &chuncks[i]);
     }
-	cout << "joinging threads..." << endl;
+	//cout << "joinging threads..." << endl;
    for(i=0; i<NB_THREADS; i++){
         pthread_join(thread[i], NULL);
         //inital sorting done
     }
-	cout << "Done!" << endl;
+	//cout << "Done!" << endl;
    
    //merge what has been sorted so far.
    vector<vector<int > > merge_sorted (NB_THREADS);
@@ -258,7 +258,7 @@ void init_threads(int* c_array_input, int size)
    // {
    //     merge_sorted.push_back(*new vector<int>());
    // }
-   cout << "copying to merge_sorted..." << endl;
+   //cout << "copying to merge_sorted..." << endl;
    for(int i = 0; i < chuncks.size(); i++)
    {
        for(int j = 0; j < chuncks[i].sorted_arrays.size(); j++ )
@@ -267,15 +267,15 @@ void init_threads(int* c_array_input, int size)
            //merge_sorted.push_back(chuncks[i].sorted_arrays[j]) 
        }
    }
-	cout << "Done!" << endl;
+	//cout << "Done!" << endl;
 
 /* just for printing what has been printed so far.
     for(int j=0; j< merge_sorted.size(); j++){
         if(j < NB_THREADS-1)
-            cout << "Following values should be less than pivot" << j <<": " << chuncks[0].pivots[j] << endl;
+            //cout << "Following values should be less than pivot" << j <<": " << chuncks[0].pivots[j] << endl;
         //else
             //cout << "largest values:" << endl;
-        cout << "list size: " << merge_sorted[j].size() << endl;
+        //cout << "list size: " << merge_sorted[j].size() << endl;
         for(int i= 0; i < merge_sorted[j].size(); i++)
         {
             cout << merge_sorted[j][i];
@@ -290,22 +290,22 @@ void init_threads(int* c_array_input, int size)
 	*/
    //divide up the work again among the threads
    struct c_array* c[NB_THREADS];
-   cout << "thread starting for final sorting phase" << endl;
+   //cout << "thread starting for final sorting phase" << endl;
    for(i=0; i<NB_THREADS; i++){
 	   //chuncks[i].array.clear();
 	    c[i] = vector_to_c_array(merge_sorted[i]);
        //move(merge_sorted[i].begin(), merge_sorted[i].end(), chuncks[i].array.begin());
-	cout << "creating thread " << i << " with an array of size: " << c[i]->size << endl;
+	//cout << "creating thread " << i << " with an array of size: " << c[i]->size << endl;
 	/*	cout << "size of array: " << c[i]->size << endl;
 		for(j=0; j<c[i]->size; j++)
 			cout << c[i]->array[j] << endl;*/
         pthread_create(&thread[i], &thread_attr, &simple_qsort_wrapper,c[i]);
     }
-   cout << "copying to merge_sorted..." << endl;
+   //cout << "copying to merge_sorted..." << endl;
    	for(i=0; i<NB_THREADS; i++){
         pthread_join(thread[i], NULL);
     }
-   cout << "done!" << endl;
+   //cout << "done!" << endl;
 
 	//concatenate results and put in array and then we are done! yay!
     //free(c_array_input);
@@ -313,7 +313,7 @@ void init_threads(int* c_array_input, int size)
 	
 	//just print all the elements
 	//should be in order
-	cout << "concatenating arrays." << endl;
+	//cout << "concatenating arrays." << endl;
 	int counter = 0;
    	for(i=0; i < NB_THREADS; i++){
 		for(j=0; j < c[i]->size; j++)
@@ -322,9 +322,9 @@ void init_threads(int* c_array_input, int size)
 			counter++;
 		}
     }
-	cout << "size of array after sorting " << sizeof(int)*size << endl;
+	//cout << "size of array after sorting " << sizeof(int)*size << endl;
 	//if so concatenate them all.
-	cout<< "FINISHED SORTING" << endl;
+	//cout<< "FINISHED SORTING" << endl;
 }
 
 static void* simple_qsort_wrapper(void* data)
@@ -353,7 +353,7 @@ c_array* vector_to_c_array(vector<int>& v)
 		c_arr[i] = v[i];
 		car->size++;
 	}
-	cout << "vector size = " << v.size() << " | array size = " << car->size << endl;
+	//cout << "vector size = " << v.size() << " | array size = " << car->size << endl;
 	return car;
 }
 
@@ -389,7 +389,7 @@ static void* qs(void* input)
 			data->sorted_arrays[NB_THREADS-1].push_back(data->array[i]);
 		}
     }
-	cout << "thread" << data->id << " done with qs!" << endl;
+	//cout << "thread" << data->id << " done with qs!" << endl;
 }
 
 static void* q(void* input)

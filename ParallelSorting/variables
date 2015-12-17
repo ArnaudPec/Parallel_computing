@@ -4,20 +4,24 @@
 compile=(nb_threads pattern size value input_instance)
 ## Number of threads: reduce to 1 to 4 threads if you work in Southfork
 nb_threads="seq 2 3 4 5 6"
+# 5 6"
 ## Input data pattern
 pattern="uniform-random increasing decreasing constant"
 ## Input data size: from 16 to 64 Mi integers
-size="`for i in 0 2 4; do echo $(( (2 ** $i) * 1024 * 1024)); done`"
+#size="`for i in 0 2 4; do echo $(( (2 ** $i) * 1024 * 1024)); done`"
+size="`for i in 0 2 4; do echo $(( (2 ** $i) * 512 * 1)); done`"
 ## Value for constant patterns
 value="123456"
 ## Number of input sets for each pattern and size
-input_instance="`seq 1 2`"
+input_instance="`seq 1 2 `" 
+## 2"
 
 ## Runtime settings
 run=(implementation run_instance)
 ## Classic parallel of Drake streaming implementation
 implementation="parallel drake"
 ## Number of runs for each implementation, input pattern and size
+##run_instance="`seq 1 2`"
 run_instance="`seq 1 2`"
 
 ## Data produce each run
