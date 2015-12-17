@@ -208,12 +208,14 @@ void init_threads(int* c_array_input, int size)
     }
     
 
+/*
     for(i=0; i < NB_THREADS-1; i++)
     {
         //could be picked better maybe
         //chuncks[i].array();
         printf("%s %i: %i\n","pivot ", i, chuncks[i].pivots[i]);
     }
+	*/
 
     /*
     for(int i = 0; i < array.size(); ++i)
@@ -232,7 +234,7 @@ void init_threads(int* c_array_input, int size)
        copy(array.begin()+jump, array.begin()+jump2, back_inserter(chuncks[i].array));
 	   //cout << "size of array: " << chuncks[i].array.size() << endl;
        chuncks[i].id = i;
-       printf("%s : %i\n","creating threads", chuncks[i].id);
+       //printf("%s : %i\n","creating threads", chuncks[i].id);
    }
 
    /*
@@ -366,7 +368,7 @@ static void* qs(void* input)
         data->sorted_arrays.push_back(*new vector<int>());
     }
 
-    printf("thread id: %i\n", data->id);
+    //printf("thread id: %i\n", data->id);
     //sort according to pivots
     for(int i = 0; i < data->array.size(); ++i)
     {

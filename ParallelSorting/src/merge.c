@@ -216,13 +216,13 @@ drake_run(task_t *task)
 		}
 	}
 
-	if (!(right_link->prod != NULL && right_link->prod->status < TASK_KILLED && pelib_cfifo_length(int)(right_link->buffer) > 0)){
+	if ((right_link->prod == NULL || right_link->prod->status >= TASK_KILLED || pelib_cfifo_length(int)(right_link->buffer) > 0)){
 		while (pelib_cfifo_length(int)(left_link->buffer) > 0 &&
 					 !pelib_cfifo_is_full(size_t)(parent_link->buffer)) {
 			pelib_cfifo_push(int)(parent_link->buffer, pelib_cfifo_pop(int)(left_link->buffer));
 		}
 	}
-	if (!(left_link->prod != NULL && left_link->prod->status < TASK_KILLED && pelib_cfifo_length(int)(left_link->buffer) > 0)){
+		if ((left_link->prod == NULL || left_link->prod->status >= TASK_KILLED || pelib_cfifo_length(int)(left_link->buffer) > 0)){
 		while (pelib_cfifo_length(int)(right_link->buffer) > 0 &&
 					 !pelib_cfifo_is_full(size_t)(parent_link->buffer)) {
 			pelib_cfifo_push(int)(parent_link->buffer, pelib_cfifo_pop(int)(right_link->buffer));
